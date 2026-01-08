@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import dotenv from 'dotenv';
 import path from 'path';
 
@@ -21,6 +20,7 @@ export default {
   gemini_api_key: process.env.GEMINI_API_KEY,
   openai_api_key: process.env.OPENAI_API_KEY,
   python_ai_service_url: process.env.PYTHON_AI_SERVICE_URL,
+  ai_service_url: process.env.AI_SERVICE_URL || 'http://localhost:8000/api/v1',
   redis_url: process.env.REDIS_URL,
   daily_api_key: process.env.DAILY_API_KEY,
 };

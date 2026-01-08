@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,11 @@ import {
   Filter,
   X,
   Pencil,
+  Loader2,
 } from "lucide-react";
+import { PatternCanvas } from "@/components/patterns/PatternCanvas";
+import { patternApi, Pattern } from "@/lib/api/patternApi";
+import { useToast } from "@/hooks/use-toast";
 
 // Emotion categories
 const emotionCategories = [
@@ -104,10 +108,119 @@ const drawingTools = [
 ];
 
 export default function PatternsPage() {
+  const { toast } = useToast();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isCreating, setIsCreating] = useState(false);
   const [selectedEmotion, setSelectedEmotion] = useState("All");
-  const [selectedPattern, setSelectedPattern] = useState<number | null>(null);
+  const [selectedPattern, setSelectedPattern] = useState<string | null>(null);
+  const [patterns, setPatterns] = useState<Pattern[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Form state
+  const [patternName, setPatternName] = useState("");
+  const [emotion, setEmotion] = useState("Joy");
+  const [intensity, setIntensity] = useState(50);
+  const [tags, setTags] = useState("");
+  const [canvasImageData, setCanvasImageData] = useState("");
+
+  // Load patterns on mount
+  useEffect(() => {
+    loadPatterns();
+  }, []);
+
+  const loadPatterns = async () => {
+    try {
+      setLoading(true);
+      const data = await patternApi.getPatterns();
+      setPatterns(data);
+    } catch (error) {
+      console.error("Failed to load patterns:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load patterns. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSavePattern = async () => {
+    if (!canvasImageData) {
+      toast({
+        title: "Error",
+        description: "Please draw a pattern first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!emotion) {
+      toast({
+        title: "Error",
+        description: "Please select an emotion.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      // Extract colors from canvas (simplified - you could enhance this)
+      const colorPalette = ["#F87171", "#FBBF24", "#34D399"];
+
+      await patternApi.createPattern({
+        imageData: canvasImageData,
+        emotion,
+        intensity: intensity / 100,
+        tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+        colorPalette,
+      });
+
+      toast({
+        title: "Success!",
+        description: "Pattern created successfully with AI analysis.",
+      });
+
+      // Reset form and reload patterns
+      setIsCreating(false);
+      setPatternName("");
+      setEmotion("Joy");
+      setIntensity(50);
+      setTags("");
+      setCanvasImageData("");
+      loadPatterns();
+    } catch (error) {
+      console.error("Failed to save pattern:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save pattern. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeletePattern = async (id: string) => {
+    try {
+      await patternApi.deletePattern(id);
+      toast({
+        title: "Success",
+        description: "Pattern deleted successfully.",
+      });
+      loadPatterns();
+    } catch (error) {
+      console.error("Failed to delete pattern:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete pattern.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const filteredPatterns =
     selectedEmotion === "All"
@@ -235,7 +348,7 @@ export default function PatternsPage() {
         <AnimatePresence mode="popLayout">
           {filteredPatterns.map((pattern, index) => (
             <motion.div
-              key={pattern.id}
+              key={pattern._id}
               layout
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -246,11 +359,11 @@ export default function PatternsPage() {
                 <Card
                   hover
                   className="group cursor-pointer overflow-hidden"
-                  onClick={() => setSelectedPattern(pattern.id)}
+                  onClick={() => setSelectedPattern(pattern._id)}
                 >
                   {/* Pattern Preview */}
                   <div
-                    className={`aspect-square bg-gradient-to-br ${pattern.gradient} p-6 relative`}
+                    className={`aspect-square bg-gradient-to-br ${pattern.gradient || 'from-coral to-peach'} p-6 relative`}
                   >
                     {/* Abstract Pattern Visualization */}
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -297,18 +410,18 @@ export default function PatternsPage() {
                     <div className="flex items-start justify-between mb-2">
                       <div>
                         <h3 className="font-semibold text-foreground">
-                          {pattern.name}
+                          {pattern.name || `Pattern ${pattern._id.slice(-6)}`}
                         </h3>
                         <p className="text-sm text-slate-500">{pattern.emotion}</p>
                       </div>
                       <span className="text-xs text-slate-400">
-                        Used {pattern.usedCount}x
+                        Used {pattern.usedCount || 0}x
                       </span>
                     </div>
 
                     {/* Color Palette */}
                     <div className="flex gap-1 mb-3">
-                      {pattern.colors.map((color, i) => (
+                      {(pattern.colors || pattern.colorPalette || []).map((color, i) => (
                         <div
                           key={i}
                           className="w-6 h-6 rounded-full shadow-sm"
@@ -334,13 +447,13 @@ export default function PatternsPage() {
                       <div className="flex items-center justify-between text-xs mb-1">
                         <span className="text-slate-500">Intensity</span>
                         <span className="font-medium text-foreground">
-                          {pattern.intensity}%
+                          {Math.round((pattern.intensity || 0) * 100)}%
                         </span>
                       </div>
                       <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                         <div
-                          className={`h-full bg-gradient-to-r ${pattern.gradient} rounded-full`}
-                          style={{ width: `${pattern.intensity}%` }}
+                          className={`h-full bg-gradient-to-r ${pattern.gradient || 'from-coral to-peach'} rounded-full`}
+                          style={{ width: `${Math.round((pattern.intensity || 0) * 100)}%` }}
                         />
                       </div>
                     </div>
@@ -351,13 +464,13 @@ export default function PatternsPage() {
                 <Card hover className="cursor-pointer">
                   <CardContent className="p-4 flex items-center gap-4">
                     <div
-                      className={`w-16 h-16 rounded-xl bg-gradient-to-br ${pattern.gradient} flex items-center justify-center flex-shrink-0`}
+                      className={`w-16 h-16 rounded-xl bg-gradient-to-br ${pattern.gradient || 'from-coral to-peach'} flex items-center justify-center flex-shrink-0`}
                     >
                       <Palette className="w-8 h-8 text-white/80" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-foreground">
-                        {pattern.name}
+                        {pattern.name || `Pattern ${pattern._id.slice(-6)}`}
                       </h3>
                       <p className="text-sm text-slate-500">{pattern.emotion}</p>
                       <div className="flex flex-wrap gap-1 mt-1">
@@ -372,7 +485,7 @@ export default function PatternsPage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      {pattern.colors.map((color, i) => (
+                      {(pattern.colors || pattern.colorPalette || []).map((color, i) => (
                         <div
                           key={i}
                           className="w-5 h-5 rounded-full shadow-sm"
@@ -382,10 +495,10 @@ export default function PatternsPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-medium text-foreground">
-                        {pattern.intensity}%
+                        {Math.round((pattern.intensity || 0) * 100)}%
                       </p>
                       <p className="text-xs text-slate-500">
-                        Used {pattern.usedCount}x
+                        Used {pattern.usedCount || 0}x
                       </p>
                     </div>
                     <div className="flex gap-2">
@@ -419,10 +532,10 @@ export default function PatternsPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden"
             >
-              {/* Modal Header */}
-              <div className="flex items-center justify-between p-6 border-b border-slate-100">
+              {/* Modal Header - Fixed */}
+              <div className="flex items-center justify-between p-6 border-b border-slate-100 flex-shrink-0">
                 <div>
                   <h2 className="text-xl font-bold text-foreground">
                     Create New Pattern
@@ -440,113 +553,111 @@ export default function PatternsPage() {
                 </Button>
               </div>
 
-              {/* Modal Content */}
-              <div className="grid lg:grid-cols-2 gap-6 p-6">
-                {/* Canvas Area */}
-                <div>
-                  <div className="aspect-square bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 flex items-center justify-center relative overflow-hidden">
-                    <div className="text-center">
-                      <div className="w-16 h-16 rounded-2xl bg-coral/10 flex items-center justify-center mx-auto mb-4">
-                        <Pencil className="w-8 h-8 text-coral" />
-                      </div>
-                      <p className="text-slate-600 font-medium">
-                        Draw your pattern here
-                      </p>
-                      <p className="text-sm text-slate-400 mt-1">
-                        Express your emotion through colors and shapes
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Drawing Tools */}
-                  <div className="flex items-center justify-center gap-4 mt-4">
-                    {drawingTools.map((tool) => (
-                      <Button
-                        key={tool.name}
-                        variant={tool.active ? "primary" : "outline"}
-                        size="sm"
-                      >
-                        <tool.icon className="w-4 h-4" />
-                        {tool.name}
-                      </Button>
-                    ))}
-                    <div className="flex gap-2 ml-4">
-                      {["#F87171", "#FBBF24", "#34D399", "#60A5FA", "#A78BFA"].map(
-                        (color) => (
-                          <button
-                            key={color}
-                            className="w-8 h-8 rounded-full shadow-sm hover:scale-110 transition-transform"
-                            style={{ backgroundColor: color }}
-                          />
-                        )
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Settings */}
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Pattern Name
-                    </label>
-                    <Input placeholder="e.g., Morning Calm" />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Associated Emotion
-                    </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {["Joy", "Calm", "Love", "Sad", "Anxious", "Excited"].map(
-                        (emotion) => (
-                          <button
-                            key={emotion}
-                            className="px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:border-coral hover:text-coral transition-colors"
-                          >
-                            {emotion}
-                          </button>
-                        )
-                      )}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Intensity
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      defaultValue="50"
-                      className="w-full accent-coral"
+              {/* Modal Content - Scrollable */}
+              <div className="overflow-y-auto flex-1 p-6">
+                <div className="grid lg:grid-cols-2 gap-6">
+                  {/* Canvas Area */}
+                  <div className="flex flex-col">
+                    <PatternCanvas
+                      width={400}
+                      height={400}
+                      onSave={(imageData) => setCanvasImageData(imageData)}
                     />
-                    <div className="flex justify-between text-xs text-slate-400 mt-1">
-                      <span>Subtle</span>
-                      <span>Overwhelming</span>
+                  </div>
+
+                  {/* Settings */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Pattern Name (Optional)
+                      </label>
+                      <Input
+                        placeholder="e.g., Morning Calm"
+                        value={patternName}
+                        onChange={(e) => setPatternName(e.target.value)}
+                      />
                     </div>
-                  </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Tags
-                    </label>
-                    <Input placeholder="peaceful, relaxed, meditation" />
-                  </div>
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Associated Emotion
+                      </label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {["Joy", "Calm", "Love", "Sad", "Anxious", "Excited"].map(
+                          (emo) => (
+                            <button
+                              key={emo}
+                              onClick={() => setEmotion(emo)}
+                              className={`px-4 py-2 rounded-xl border text-sm font-medium transition-colors ${
+                                emotion === emo
+                                  ? "bg-coral text-white border-coral"
+                                  : "border-slate-200 text-slate-600 hover:border-coral hover:text-coral"
+                              }`}
+                            >
+                              {emo}
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
 
-                  <div className="flex gap-3 pt-4">
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => setIsCreating(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button variant="primary" className="flex-1">
-                      <Sparkles className="w-5 h-5" />
-                      Save Pattern
-                    </Button>
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Intensity
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={intensity}
+                        onChange={(e) => setIntensity(Number(e.target.value))}
+                        className="w-full accent-coral"
+                      />
+                      <div className="flex justify-between text-xs text-slate-400 mt-1">
+                        <span>Subtle</span>
+                        <span>{intensity}%</span>
+                        <span>Overwhelming</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">
+                        Tags (comma-separated)
+                      </label>
+                      <Input
+                        placeholder="peaceful, relaxed, meditation"
+                        value={tags}
+                        onChange={(e) => setTags(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="flex gap-3 pt-4">
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setIsCreating(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="primary"
+                        className="flex-1"
+                        onClick={handleSavePattern}
+                        disabled={saving}
+                      >
+                        {saving ? (
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-5 h-5" />
+                            Save Pattern
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>

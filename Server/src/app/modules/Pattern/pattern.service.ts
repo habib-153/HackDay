@@ -1,22 +1,32 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable no-unused-vars */
 import httpStatus from 'http-status';
 import AppError from '../../errors/AppError';
 import { TUserPattern } from './pattern.interface';
 import { UserPattern } from './pattern.model';
 import { uploadToCloudinary } from '../../utils/uploadImage';
 import { deleteImageFromCloudinary } from '../../utils/deleteImage';
+import { aiService } from '../../services/aiService';
 
 const createPattern = async (userId: string, payload: Partial<TUserPattern> & { imageData: string }) => {
     const imageUrl = await uploadToCloudinary(payload.imageData);
+
+    // Analyze pattern with AI service
+    let features, embedding;
+    try {
+        const analysis = await aiService.analyzePattern(payload.imageData, userId);
+        features = analysis.features;
+        embedding = analysis.embedding;
+    } catch (error) {
+        console.error('AI analysis failed, saving pattern without features:', error);
+        // Continue without AI features if service fails
+    }
 
     const pattern = await UserPattern.create({
         ...payload,
         userId,
         imageUrl,
+        features,
+        embedding,
     });
-
-    // TODO: Call Python AI service to analyze pattern and generate features/embedding
 
     return pattern;
 };
@@ -69,20 +79,24 @@ const interpretPattern = async (
     senderId: string,
     imageData: string,
 ) => {
-    // TODO: Get sender's pattern library for context when AI service is integrated
-    // const senderPatterns = await UserPattern.find({ userId: senderId });
+    try {
+        // Call AI service to interpret pattern
+        const interpretation = await aiService.interpretPattern(
+            imageData,
+            senderId,
+            recipientId,
+        );
 
-    // TODO: Call Python AI service to:
-    // 1. Extract features from received pattern
-    // 2. Match with sender's pattern library
-    // 3. Generate interpretation text
-
-    // Placeholder response
-    return {
-        interpretation: 'This pattern appears to express a complex emotion. Analysis pending AI integration.',
-        matchedPatterns: [],
-        confidence: 0,
-    };
+        return interpretation;
+    } catch (error) {
+        console.error('Pattern interpretation failed:', error);
+        // Return fallback response
+        return {
+            interpretation: 'This pattern appears to express a complex emotion. The AI service is currently unavailable for detailed interpretation.',
+            matchedPatterns: [],
+            confidence: 0.3,
+        };
+    }
 };
 
 export const PatternServices = {
