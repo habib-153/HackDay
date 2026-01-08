@@ -63,6 +63,16 @@ function VideoCallInline({ userId, socketUrl, aiServiceUrl, contactId, contactNa
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const emotionIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  // Refs to avoid stale closures in socket handlers
+  const localStreamRef = useRef<MediaStream | null>(null);
+  const callIdRef = useRef<string | null>(null);
+  const socketRef = useRef<Socket | null>(null);
+
+  // Keep refs in sync with state
+  useEffect(() => { localStreamRef.current = localStream; }, [localStream]);
+  useEffect(() => { callIdRef.current = callId; }, [callId]);
+  useEffect(() => { socketRef.current = socket; }, [socket]);
 
   const addLog = useCallback((msg: string) => {
     const time = new Date().toLocaleTimeString();
@@ -111,16 +121,24 @@ function VideoCallInline({ userId, socketUrl, aiServiceUrl, contactId, contactNa
     });
 
     newSocket.on("call:accepted", (data: { callId: string }) => {
-      addLog(`Call accepted, starting WebRTC...`);
+      addLog(`Call accepted by peer, callId: ${data.callId}`);
+      setCallId(data.callId);
       setStatus("connecting");
-      // Caller initiates WebRTC
-      if (localStream) {
-        createPeer(true, newSocket, localStream);
+      
+      // Caller initiates WebRTC immediately
+      const stream = localStreamRef.current;
+      addLog(`Stream check: ${stream ? 'available' : 'null'}, peer: ${peerRef.current ? 'exists' : 'null'}`);
+      
+      if (stream && !peerRef.current) {
+        addLog(`Creating INITIATOR peer...`);
+        createPeerConnection(true, newSocket, stream, data.callId);
+      } else if (!stream) {
+        addLog(`ERROR: No local stream available for WebRTC`);
       }
     });
 
     newSocket.on("call:started", (data: { callId: string }) => {
-      addLog(`Call started`);
+      addLog(`Call started, waiting for WebRTC signal...`);
       setStatus("connecting");
     });
 
@@ -135,14 +153,24 @@ function VideoCallInline({ userId, socketUrl, aiServiceUrl, contactId, contactNa
     });
 
     // WebRTC signaling
-    newSocket.on("webrtc:signal", (data: { signal: SignalData; from: string }) => {
-      addLog(`Received WebRTC signal from ${data.from}`);
+    newSocket.on("webrtc:signal", (data: { signal: SignalData; from: string; callId?: string }) => {
+      addLog(`Received signal from ${data.from}, type: ${data.signal?.type || 'candidate'}`);
       
       if (peerRef.current) {
+        // Existing peer - just signal it
+        addLog(`Forwarding signal to existing peer`);
         peerRef.current.signal(data.signal);
-      } else if (localStream) {
-        // Receiver creates peer when receiving first signal
-        createPeer(false, newSocket, localStream, data.signal);
+      } else {
+        // No peer yet - create as receiver
+        const stream = localStreamRef.current;
+        const cid = data.callId || callIdRef.current;
+        addLog(`Creating RECEIVER peer? stream=${!!stream}, callId=${cid}`);
+        
+        if (stream && cid) {
+          createPeerConnection(false, newSocket, stream, cid, data.signal);
+        } else {
+          addLog(`ERROR: Cannot create peer - missing stream or callId`);
+        }
       }
     });
 
@@ -161,9 +189,14 @@ function VideoCallInline({ userId, socketUrl, aiServiceUrl, contactId, contactNa
     };
   }, [socketUrl, userId, addLog]);
 
-  // Create WebRTC peer
-  const createPeer = useCallback((initiator: boolean, sock: Socket, stream: MediaStream, incomingSignal?: SignalData) => {
-    addLog(`Creating ${initiator ? 'initiator' : 'receiver'} peer...`);
+  // Create WebRTC peer connection
+  const createPeerConnection = useCallback((initiator: boolean, sock: Socket, stream: MediaStream, currentCallId: string, incomingSignal?: SignalData) => {
+    if (peerRef.current) {
+      addLog(`Peer already exists, destroying old one...`);
+      peerRef.current.destroy();
+    }
+
+    addLog(`Creating ${initiator ? 'initiator' : 'receiver'} peer for call ${currentCallId}...`);
 
     const peer = new SimplePeer({
       initiator,
@@ -173,17 +206,14 @@ function VideoCallInline({ userId, socketUrl, aiServiceUrl, contactId, contactNa
     });
 
     peer.on("signal", (signal) => {
-      addLog(`Sending WebRTC signal...`);
-      sock.emit("webrtc:signal", { signal, to: contactId, callId });
+      addLog(`Sending signal (${signal.type || 'candidate'}) to ${contactId}`);
+      sock.emit("webrtc:signal", { signal, to: contactId, callId: currentCallId });
     });
 
     peer.on("connect", () => {
       addLog(`WebRTC connected!`);
       setStatus("active");
-      // Start emotion analysis
-      if (emotionEnabled) {
-        startEmotionAnalysis();
-      }
+      // Emotion analysis will be started by effect when status becomes "active"
     });
 
     peer.on("stream", (remoteStr) => {
@@ -204,7 +234,7 @@ function VideoCallInline({ userId, socketUrl, aiServiceUrl, contactId, contactNa
     }
 
     peerRef.current = peer;
-  }, [contactId, callId, emotionEnabled, addLog]);
+  }, [contactId, addLog]);
 
   // Get camera access
   useEffect(() => {
@@ -265,7 +295,10 @@ function VideoCallInline({ userId, socketUrl, aiServiceUrl, contactId, contactNa
 
   const analyzeEmotion = useCallback(async () => {
     const frame = captureFrame();
-    if (!frame || !socket || !callId) return;
+    const currentSocket = socketRef.current;
+    const currentCallId = callIdRef.current;
+    
+    if (!frame || !currentSocket || !currentCallId) return;
 
     try {
       const response = await fetch(`${aiServiceUrl}/api/v1/emotion/analyze`, {
@@ -274,7 +307,7 @@ function VideoCallInline({ userId, socketUrl, aiServiceUrl, contactId, contactNa
         body: JSON.stringify({
           image: frame,
           userId,
-          callId,
+          callId: currentCallId,
           context: `Video call with ${contactName}`,
         }),
       });
@@ -292,9 +325,9 @@ function VideoCallInline({ userId, socketUrl, aiServiceUrl, contactId, contactNa
         
         setMyEmotion(emotionData);
         
-        // Broadcast to peer
-        socket.emit("emotion:frame", {
-          callId,
+        // Broadcast to peer via call room
+        currentSocket.emit("emotion:frame", {
+          callId: currentCallId,
           userId,
           emotion: emotionData,
         });
@@ -302,7 +335,7 @@ function VideoCallInline({ userId, socketUrl, aiServiceUrl, contactId, contactNa
     } catch (err) {
       // Silent fail for emotion analysis
     }
-  }, [captureFrame, socket, callId, aiServiceUrl, userId, contactName]);
+  }, [captureFrame, aiServiceUrl, userId, contactName]);
 
   const startEmotionAnalysis = useCallback(() => {
     if (emotionIntervalRef.current) return;
@@ -331,6 +364,18 @@ function VideoCallInline({ userId, socketUrl, aiServiceUrl, contactId, contactNa
     setMyEmotion(null);
     setPeerEmotion(null);
   }, [stopEmotionAnalysis]);
+
+  // Start emotion analysis when call becomes active
+  useEffect(() => {
+    if (status === "active" && emotionEnabled) {
+      startEmotionAnalysis();
+    }
+    return () => {
+      if (status !== "active") {
+        stopEmotionAnalysis();
+      }
+    };
+  }, [status, emotionEnabled, startEmotionAnalysis, stopEmotionAnalysis]);
 
   // Call actions
   const startCall = () => {

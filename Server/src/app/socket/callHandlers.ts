@@ -124,9 +124,15 @@ export const callHandlers = (io: Server, socket: Socket, userId: string) => {
 
     // WebRTC signaling (simple-peer format) - forward signal to target user
     socket.on('webrtc:signal', ({ signal, to, callId }: { signal: unknown; to: string; callId: string }) => {
-        console.log(`[WebRTC] Signal from ${userId} to ${to} for call ${callId}`);
+        const signalType = (signal as { type?: string })?.type || 'candidate';
+        console.log(`[WebRTC] Signal ${signalType} from ${userId} → ${to} (call: ${callId})`);
 
-        io.to(`user:${to}`).emit('webrtc:signal', {
+        // Check if target user is connected
+        const targetRoom = `user:${to}`;
+        const targetSockets = io.sockets.adapter.rooms.get(targetRoom);
+        console.log(`[WebRTC] Target room ${targetRoom} has ${targetSockets?.size || 0} sockets`);
+
+        io.to(targetRoom).emit('webrtc:signal', {
             signal,
             from: userId,
             callId,

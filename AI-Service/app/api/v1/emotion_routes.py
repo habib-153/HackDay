@@ -72,6 +72,8 @@ async def analyze_emotion(request: EmotionAnalysisRequest):
     4. Maintains session memory for continuity
     """
     try:
+        print(f"[Emotion] Analyzing for user {request.userId}, callId: {request.callId}")
+        
         translator = get_emotion_translator()
         
         result = await translator.translate(
@@ -80,6 +82,8 @@ async def analyze_emotion(request: EmotionAnalysisRequest):
             call_id=request.callId,
             context=request.context
         )
+        
+        print(f"[Emotion] Result: success={result.get('success')}, emotion={result.get('dominantEmotion')}")
         
         return EmotionAnalysisResponse(
             success=result.get("success", False),
@@ -94,6 +98,9 @@ async def analyze_emotion(request: EmotionAnalysisRequest):
         )
         
     except Exception as e:
+        import traceback
+        print(f"[Emotion] ERROR: {str(e)}")
+        traceback.print_exc()
         raise HTTPException(
             status_code=500, 
             detail=f"Emotion analysis failed: {str(e)}"

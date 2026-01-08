@@ -1,114 +1,230 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Video,
+  VideoOff,
+  Mic,
+  MicOff,
   Phone,
-  Search,
+  PhoneOff,
+  Brain,
+  Users,
   Clock,
-  ArrowLeft,
+  Heart,
 } from "lucide-react";
-import { VideoCall } from "@/components/video-call";
-import { useSocket } from "@/hooks/useSocket";
-import { api } from "@/lib/api";
 
-const MOCK_USER_ID = "user_demo_123";
-const MOCK_TOKEN = api.getAccessToken() || "demo_token";
-
-const mockContacts = [
-  { id: "contact_1", name: "Sarah Johnson", avatar: "SJ", status: "online" as const, lastCall: "2 hours ago" },
-  { id: "contact_2", name: "Mom", avatar: "M", status: "online" as const, lastCall: "Yesterday" },
-  { id: "contact_3", name: "David Chen", avatar: "DC", status: "offline" as const, lastCall: "3 days ago" },
-  { id: "contact_4", name: "Emma Wilson", avatar: "EW", status: "online" as const, lastCall: "1 week ago" },
+// Simulated emotions for demo
+const DEMO_EMOTIONS = [
+  { emotion: "happy", text: "They seem happy and engaged in the conversation", confidence: 0.92 },
+  { emotion: "thoughtful", text: "They appear to be contemplating something deeply", confidence: 0.85 },
+  { emotion: "curious", text: "They're showing interest and curiosity", confidence: 0.88 },
+  { emotion: "peaceful", text: "They seem calm and at ease", confidence: 0.90 },
+  { emotion: "excited", text: "They're showing signs of excitement", confidence: 0.87 },
+  { emotion: "grateful", text: "They appear grateful and appreciative", confidence: 0.83 },
 ];
 
-const mockRecentCalls = [
-  { id: "call_1", contact: "Sarah Johnson", contactId: "contact_1", avatar: "SJ", duration: "23 min", time: "Today, 2:30 PM", emotions: ["Happy", "Grateful"], type: "outgoing" as const },
-  { id: "call_2", contact: "Mom", contactId: "contact_2", avatar: "M", duration: "45 min", time: "Yesterday", emotions: ["Love", "Peaceful"], type: "incoming" as const },
-  { id: "call_3", contact: "David Chen", contactId: "contact_3", avatar: "DC", duration: "12 min", time: "Jan 5", emotions: ["Curious"], type: "outgoing" as const },
+const DEMO_CONTACTS = [
+  { id: "1", name: "Sarah Johnson", status: "online", avatar: "S", lastCall: "2 hours ago" },
+  { id: "2", name: "Michael Chen", status: "online", avatar: "M", lastCall: "Yesterday" },
+  { id: "3", name: "Emma Williams", status: "offline", avatar: "E", lastCall: "3 days ago" },
+  { id: "4", name: "David Brown", status: "online", avatar: "D", lastCall: "1 week ago" },
 ];
 
-interface Contact {
-  id: string;
-  name: string;
-  avatar: string;
-  status: "online" | "offline";
-  lastCall: string;
-}
-
-export default function VideoCallsPage() {
-  const [contacts] = useState<Contact[]>(mockContacts);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+export default function CallsPage() {
   const [isInCall, setIsInCall] = useState(false);
-  const [showCallScreen, setShowCallScreen] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<typeof DEMO_CONTACTS[0] | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isVideoOff, setIsVideoOff] = useState(false);
+  const [currentEmotion, setCurrentEmotion] = useState(DEMO_EMOTIONS[0]);
+  const [peerEmotion, setPeerEmotion] = useState(DEMO_EMOTIONS[2]);
+  const [callDuration, setCallDuration] = useState(0);
+  const [emotionEnabled, setEmotionEnabled] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  const { isConnected, on, off } = useSocket({
-    autoConnect: !!MOCK_TOKEN,
-    token: MOCK_TOKEN,
-  });
-
+  // Simulate camera access
   useEffect(() => {
-    if (!isConnected) return;
-
-    const handleIncomingCall = (data: { callId: string; callerId: string }) => {
-      const caller = contacts.find((c) => c.id === data.callerId);
-      if (caller) {
-        setSelectedContact(caller);
-        setShowCallScreen(true);
-      }
-    };
-
-    on("call:incoming", handleIncomingCall);
-    return () => { off("call:incoming"); };
-  }, [isConnected, contacts, on, off]);
-
-  const filteredContacts = contacts.filter((contact) =>
-    contact.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const startCallWithContact = useCallback((contact: Contact) => {
-    setSelectedContact(contact);
-    setShowCallScreen(true);
-    setIsInCall(true);
-  }, []);
-
-  const handleCallEnd = useCallback(() => {
-    setIsInCall(false);
-    setShowCallScreen(false);
-    setSelectedContact(null);
-  }, []);
-
-  const backToContacts = useCallback(() => {
-    if (!isInCall) {
-      setShowCallScreen(false);
-      setSelectedContact(null);
+    if (isInCall && videoRef.current) {
+      navigator.mediaDevices?.getUserMedia({ video: true, audio: true })
+        .then(stream => {
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        })
+        .catch(() => {
+          // Demo mode - camera not required
+        });
     }
   }, [isInCall]);
 
-  if (showCallScreen && selectedContact) {
+  // Simulate emotion changes during call
+  useEffect(() => {
+    if (!isInCall || !emotionEnabled) return;
+
+    const interval = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * DEMO_EMOTIONS.length);
+      setCurrentEmotion(DEMO_EMOTIONS[randomIndex]);
+      
+      const peerIndex = Math.floor(Math.random() * DEMO_EMOTIONS.length);
+      setPeerEmotion(DEMO_EMOTIONS[peerIndex]);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [isInCall, emotionEnabled]);
+
+  // Call timer
+  useEffect(() => {
+    if (!isInCall) return;
+    const interval = setInterval(() => setCallDuration(d => d + 1), 1000);
+    return () => clearInterval(interval);
+  }, [isInCall]);
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const startCall = (contact: typeof DEMO_CONTACTS[0]) => {
+    setSelectedContact(contact);
+    setIsInCall(true);
+    setCallDuration(0);
+  };
+
+  const endCall = () => {
+    setIsInCall(false);
+    setSelectedContact(null);
+    setCallDuration(0);
+  };
+
+  if (isInCall && selectedContact) {
     return (
-      <div className="fixed inset-0 z-50 bg-slate-900">
-        {!isInCall && (
-          <button
-            onClick={backToContacts}
-            className="absolute top-4 left-4 z-50 p-2 rounded-md bg-black/30 hover:bg-black/50 text-white transition-colors"
+      <div className="fixed inset-0 bg-slate-900 z-50 flex flex-col">
+        {/* Call Header */}
+        <div className="bg-slate-800 p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-medium">
+              {selectedContact.avatar}
+            </div>
+            <div>
+              <h2 className="text-white font-medium">{selectedContact.name}</h2>
+              <p className="text-slate-400 text-sm flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {formatDuration(callDuration)}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {emotionEnabled && (
+              <span className="px-3 py-1 bg-primary/20 text-primary rounded-full text-sm flex items-center gap-1">
+                <Brain className="w-4 h-4" />
+                AI Active
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Main Video Area */}
+        <div className="flex-1 relative bg-gradient-to-b from-slate-800 to-slate-900">
+          {/* Remote Video Placeholder */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-32 h-32 rounded-full bg-slate-700 flex items-center justify-center mx-auto mb-4">
+                <span className="text-5xl text-white">{selectedContact.avatar}</span>
+              </div>
+              <p className="text-white text-xl">{selectedContact.name}</p>
+              <p className="text-green-400 text-sm mt-1">Connected</p>
+            </div>
+          </div>
+
+          {/* Local Video (PiP) */}
+          <div className="absolute top-4 right-4 w-48 h-36 rounded-lg overflow-hidden border-2 border-white/20 bg-slate-800">
+            <video
+              ref={videoRef}
+              autoPlay
+              muted
+              playsInline
+              className={`w-full h-full object-cover scale-x-[-1] ${isVideoOff ? 'hidden' : ''}`}
+            />
+            {isVideoOff && (
+              <div className="w-full h-full flex items-center justify-center">
+                <VideoOff className="w-8 h-8 text-slate-500" />
+              </div>
+            )}
+            <div className="absolute bottom-1 left-1 px-2 py-0.5 bg-black/60 rounded text-xs text-white">
+              You
+            </div>
+          </div>
+
+          {/* Emotion Overlays */}
+          {emotionEnabled && (
+            <>
+              {/* Your Emotion */}
+              <div className="absolute bottom-28 right-4 bg-black/70 rounded-lg p-3 max-w-52">
+                <div className="flex items-center gap-2 mb-1">
+                  <Brain className="w-4 h-4 text-primary" />
+                  <span className="text-white text-sm font-medium">Your Emotion</span>
+                </div>
+                <p className="text-primary text-lg capitalize">{currentEmotion.emotion}</p>
+                <p className="text-slate-300 text-xs">{Math.round(currentEmotion.confidence * 100)}% confidence</p>
+                <p className="text-slate-400 text-xs mt-1 italic">&quot;{currentEmotion.text}&quot;</p>
+              </div>
+
+              {/* Peer Emotion */}
+              <div className="absolute bottom-28 left-4 bg-black/70 rounded-lg p-3 max-w-52">
+                <div className="flex items-center gap-2 mb-1">
+                  <Heart className="w-4 h-4 text-green-400" />
+                  <span className="text-white text-sm font-medium">{selectedContact.name}</span>
+                </div>
+                <p className="text-green-400 text-lg capitalize">{peerEmotion.emotion}</p>
+                <p className="text-slate-300 text-xs">{Math.round(peerEmotion.confidence * 100)}% confidence</p>
+                <p className="text-slate-400 text-xs mt-1 italic">&quot;{peerEmotion.text}&quot;</p>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Call Controls */}
+        <div className="bg-slate-800/90 p-6 flex items-center justify-center gap-4">
+          <Button
+            variant={isMuted ? "destructive" : "outline"}
+            size="icon"
+            onClick={() => setIsMuted(!isMuted)}
+            className="w-14 h-14 rounded-full"
           >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-        )}
-        <VideoCall
-          userId={MOCK_USER_ID}
-          token={MOCK_TOKEN}
-          contactId={selectedContact.id}
-          contactName={selectedContact.name}
-          contactAvatar={selectedContact.avatar}
-          autoCall={true}
-          onCallEnd={handleCallEnd}
-        />
+            {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+          </Button>
+
+          <Button
+            variant={isVideoOff ? "destructive" : "outline"}
+            size="icon"
+            onClick={() => setIsVideoOff(!isVideoOff)}
+            className="w-14 h-14 rounded-full"
+          >
+            {isVideoOff ? <VideoOff className="w-6 h-6" /> : <Video className="w-6 h-6" />}
+          </Button>
+
+          <Button
+            variant={emotionEnabled ? "primary" : "outline"}
+            size="icon"
+            onClick={() => setEmotionEnabled(!emotionEnabled)}
+            className="w-14 h-14 rounded-full"
+            title="Toggle AI Emotion Detection"
+          >
+            <Brain className="w-6 h-6" />
+          </Button>
+
+          <Button
+            variant="destructive"
+            size="icon"
+            onClick={endCall}
+            className="w-16 h-16 rounded-full"
+          >
+            <PhoneOff className="w-7 h-7" />
+          </Button>
+        </div>
       </div>
     );
   }
@@ -119,149 +235,82 @@ export default function VideoCallsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900">Video Calls</h1>
-          <p className="text-sm text-slate-500">Emotion-recognized video calling</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className={`w-2 h-2 rounded-full ${isConnected ? "bg-emerald-500" : "bg-slate-300"}`} />
-          <span className="text-xs text-slate-500">{isConnected ? "Connected" : "Connecting..."}</span>
+          <p className="text-sm text-slate-500">Connect with emotion-aware video calls</p>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-4">
-        {/* Left - Contacts */}
-        <div className="space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input
-              placeholder="Search contacts..."
-              className="pl-9"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+      {/* Feature Highlight */}
+      <Card className="bg-gradient-to-r from-primary/10 to-teal-50 border-primary/20">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+              <Brain className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-slate-900 mb-1">AI Emotion Detection</h3>
+              <p className="text-sm text-slate-600">
+                Real-time facial expression analysis translates emotions into meaningful text,
+                helping your loved ones understand how you&apos;re feeling during the call.
+              </p>
+            </div>
           </div>
+        </CardContent>
+      </Card>
 
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="font-medium text-slate-900">Contacts</h2>
-                <span className="text-xs text-slate-500">
-                  {contacts.filter((c) => c.status === "online").length} online
-                </span>
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          { label: "Total Calls", value: "24", icon: Phone },
+          { label: "This Week", value: "8", icon: Clock },
+          { label: "Contacts", value: "4", icon: Users },
+        ].map((stat) => (
+          <Card key={stat.label}>
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <stat.icon className="w-5 h-5 text-primary" />
               </div>
-              <div className="space-y-2">
-                {filteredContacts.map((contact) => (
-                  <div
-                    key={contact.id}
-                    onClick={() => startCallWithContact(contact)}
-                    className="flex items-center gap-3 p-3 rounded-md hover:bg-slate-50 cursor-pointer transition-colors group"
-                  >
-                    <div className="relative">
-                      <div className="w-10 h-10 rounded-md bg-slate-200 flex items-center justify-center text-slate-600 text-sm font-medium">
-                        {contact.avatar}
-                      </div>
-                      <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${contact.status === "online" ? "bg-emerald-500" : "bg-slate-300"}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-900 truncate">{contact.name}</p>
-                      <p className="text-xs text-slate-500">Last: {contact.lastCall}</p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity w-8 h-8"
-                      onClick={(e) => { e.stopPropagation(); startCallWithContact(contact); }}
-                    >
-                      <Video className="w-4 h-4 text-primary" />
-                    </Button>
-                  </div>
-                ))}
+              <div>
+                <p className="text-2xl font-semibold text-slate-900">{stat.value}</p>
+                <p className="text-xs text-slate-500">{stat.label}</p>
               </div>
             </CardContent>
           </Card>
+        ))}
+      </div>
 
-          <Card>
-            <CardContent className="p-4">
-              <h2 className="font-medium text-slate-900 mb-3">Recent Calls</h2>
-              <div className="space-y-2">
-                {mockRecentCalls.map((call) => (
-                  <div
-                    key={call.id}
-                    onClick={() => {
-                      const contact = contacts.find((c) => c.id === call.contactId);
-                      if (contact) startCallWithContact(contact);
-                    }}
-                    className="p-3 rounded-md bg-slate-50 hover:bg-slate-100 cursor-pointer transition-colors"
-                  >
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 rounded-md bg-slate-200 flex items-center justify-center text-slate-600 text-xs font-medium">
-                        {call.avatar}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-slate-900">{call.contact}</p>
-                        <p className="text-xs text-slate-500">{call.time}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs font-medium text-slate-600">{call.duration}</p>
-                        <p className={`text-xs ${call.type === "incoming" ? "text-emerald-600" : "text-blue-600"}`}>
-                          {call.type === "incoming" ? "↓ In" : "↑ Out"}
-                        </p>
-                      </div>
+      {/* Contacts */}
+      <div>
+        <h2 className="font-semibold text-slate-900 mb-4">Contacts</h2>
+        <div className="grid gap-3">
+          {DEMO_CONTACTS.map((contact) => (
+            <Card key={contact.id} className="hover:border-primary/50 transition-colors cursor-pointer">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-medium">
+                      {contact.avatar}
                     </div>
-                    <div className="flex flex-wrap gap-1">
-                      {call.emotions.map((emotion) => (
-                        <span key={emotion} className="px-2 py-0.5 text-xs rounded-md bg-white text-slate-600">
-                          {emotion}
-                        </span>
-                      ))}
-                    </div>
+                    <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                      contact.status === 'online' ? 'bg-green-500' : 'bg-slate-400'
+                    }`} />
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right - Preview */}
-        <div className="lg:col-span-2">
-          <Card className="h-full">
-            <CardContent className="p-0 h-full">
-              <div className="relative aspect-video bg-slate-800 flex items-center justify-center rounded-t-lg">
-                <div className="text-center p-8">
-                  <div className="w-16 h-16 rounded-md bg-slate-700 flex items-center justify-center mx-auto mb-4">
-                    <Video className="w-8 h-8 text-slate-400" />
+                  <div>
+                    <p className="font-medium text-slate-900">{contact.name}</p>
+                    <p className="text-sm text-slate-500">Last call: {contact.lastCall}</p>
                   </div>
-                  <h3 className="text-white text-lg font-medium mb-2">Emotion Video Calls</h3>
-                  <p className="text-slate-400 text-sm max-w-md mx-auto mb-4">
-                    Real-time facial expression analysis that translates emotions into natural language.
-                  </p>
-                  <Button
-                    variant="primary"
-                    onClick={() => {
-                      const onlineContact = contacts.find((c) => c.status === "online");
-                      if (onlineContact) startCallWithContact(onlineContact);
-                    }}
-                  >
-                    <Phone className="w-4 h-4" />
-                    Start Call
-                  </Button>
                 </div>
-              </div>
-              <div className="p-4">
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { title: "Real-time Analysis", desc: "AI analyzes expressions every 2-3 seconds" },
-                    { title: "Emotion Translation", desc: "Feelings translated to natural language" },
-                    { title: "Deeper Connection", desc: "Help others understand your emotions" },
-                  ].map((feature) => (
-                    <div key={feature.title} className="p-3 rounded-md bg-slate-50">
-                      <h4 className="text-sm font-medium text-slate-900 mb-1">{feature.title}</h4>
-                      <p className="text-xs text-slate-500">{feature.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => startCall(contact)}
+                  disabled={contact.status !== 'online'}
+                >
+                  <Video className="w-4 h-4 mr-1" />
+                  {contact.status === 'online' ? 'Call' : 'Offline'}
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     </div>

@@ -7,335 +7,396 @@ import { Input } from "@/components/ui/input";
 import {
   Bot,
   Send,
+  Sparkles,
   Heart,
   Brain,
-  Settings,
-  RotateCcw,
+  Users,
+  MessageCircle,
+  Lightbulb,
+  RefreshCw,
+  Copy,
+  Check,
   ThumbsUp,
   ThumbsDown,
-  Copy,
-  Volume2,
-  Mic,
-  TrendingUp,
-  Sparkles,
-  Zap,
 } from "lucide-react";
 
-const personalityTraits = [
-  { trait: "Empathetic", level: 92 },
-  { trait: "Patient", level: 88 },
-  { trait: "Encouraging", level: 95 },
-  { trait: "Understanding", level: 90 },
+const DEMO_SUGGESTIONS = [
+  "I'm thinking of you and wanted to reach out with some warmth today.",
+  "Your kindness means so much to me - thank you for being you.",
+  "I hope this message finds you in good spirits. You've been on my mind.",
+  "Sending you positive thoughts and hoping today treats you well.",
+  "Just wanted you to know how much I appreciate having you in my life.",
 ];
 
-const learningProgress = [
-  { category: "Your Emotions", patterns: 48, accuracy: 94 },
-  { category: "Expression Style", patterns: 32, accuracy: 89 },
-  { category: "Context Awareness", patterns: 56, accuracy: 91 },
+const CONTACTS = [
+  { id: "1", name: "Sarah Johnson", relationship: "Friend", avatar: "S", recentMood: "Happy" },
+  { id: "2", name: "Michael Chen", relationship: "Family", avatar: "M", recentMood: "Thoughtful" },
+  { id: "3", name: "Emma Williams", relationship: "Friend", avatar: "E", recentMood: "Peaceful" },
 ];
 
-const suggestedPrompts = [
-  { text: "Help me express gratitude", icon: "💝" },
-  { text: "I'm feeling anxious", icon: "😰" },
-  { text: "Create a message for my mom", icon: "👩" },
-  { text: "Share my excitement", icon: "🎉" },
-  { text: "I need to calm down", icon: "🧘" },
-  { text: "Express my love", icon: "❤️" },
+const QUICK_PROMPTS = [
+  "Say thank you",
+  "Share excitement",
+  "Express concern",
+  "Send encouragement",
+  "Show gratitude",
+  "Comfort them",
 ];
 
-const initialMessages = [
-  { 
-    id: 1, 
-    sender: "avatar", 
-    content: "Hello! 👋 I'm your personal emotion companion. I've been learning how you express yourself, and I'm here to help you communicate your feelings better. How are you feeling today?", 
-    time: "Just now" 
-  },
-];
+interface Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
+  suggestions?: string[];
+  emotion?: string;
+}
 
 export default function AvatarPage() {
-  const [messages, setMessages] = useState(initialMessages);
-  const [inputValue, setInputValue] = useState("");
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "1",
+      role: "assistant",
+      content: "Hello! I'm your HeartSpeak AI Assistant. I can help you express your emotions to loved ones through thoughtful messages. Who would you like to connect with today?",
+      timestamp: new Date(),
+    },
+  ]);
+  const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [selectedContact, setSelectedContact] = useState<typeof CONTACTS[0] | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!inputValue.trim()) return;
+  const generateResponse = (userInput: string): Message => {
+    const lowered = userInput.toLowerCase();
 
-    const userMessage = { id: messages.length + 1, sender: "user", content: inputValue, time: "Just now" };
-    setMessages([...messages, userMessage]);
-    setInputValue("");
+    // Emotional responses
+    if (lowered.includes("thank") || lowered.includes("grateful")) {
+      return {
+        id: Date.now().toString(),
+        role: "assistant",
+        content: "That's wonderful! Expressing gratitude strengthens connections. Here are some heartfelt ways to say thank you:",
+        timestamp: new Date(),
+        suggestions: [
+          "Your kindness touches my heart deeply. Thank you for everything.",
+          "I'm so grateful to have you in my life. You make everything better.",
+          "Words can't express how thankful I am. Your support means the world.",
+        ],
+        emotion: "grateful",
+      };
+    }
 
-    setIsTyping(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500 + Math.random() * 1000));
+    if (lowered.includes("sad") || lowered.includes("down") || lowered.includes("upset")) {
+      return {
+        id: Date.now().toString(),
+        role: "assistant",
+        content: "I understand you're going through a difficult time. It's okay to share these feelings. Here are some ways to open up:",
+        timestamp: new Date(),
+        suggestions: [
+          "I'm having a hard day and could use some support from you.",
+          "I wanted to share that I'm feeling down. Your presence helps.",
+          "Things have been tough lately. Thank you for being someone I can turn to.",
+        ],
+        emotion: "sad",
+      };
+    }
 
-    const avatarResponses = [
-      "I can sense the emotion in your words. Based on what you've shared, it sounds like you're experiencing something meaningful. Would you like me to help you express this to someone? 💭",
-      "That's a beautiful feeling to have! I've noticed you often express this emotion with warmth and sincerity. Should I help craft a message that captures this? ✨",
-      "I understand how you feel. Remember, it's completely okay to experience this. Based on your communication patterns, I think a heartfelt message would resonate well. Want me to help? 🌟",
-      "Thank you for sharing that with me. Your emotional awareness is growing - I can see it in how you articulate your feelings. How can I assist you further? 💫",
-    ];
+    if (lowered.includes("happy") || lowered.includes("excited") || lowered.includes("great")) {
+      return {
+        id: Date.now().toString(),
+        role: "assistant",
+        content: "That's amazing! Sharing joy multiplies it. Here's how you can spread that happiness:",
+        timestamp: new Date(),
+        suggestions: [
+          "I'm so excited and had to share this moment with you!",
+          "Life feels wonderful right now, and you're part of why!",
+          "Something great happened and you were the first person I wanted to tell!",
+        ],
+        emotion: "happy",
+      };
+    }
 
-    const avatarMessage = { 
-      id: messages.length + 2, 
-      sender: "avatar", 
-      content: avatarResponses[Math.floor(Math.random() * avatarResponses.length)], 
-      time: "Just now" 
+    if (lowered.includes("miss") || lowered.includes("thinking")) {
+      return {
+        id: Date.now().toString(),
+        role: "assistant",
+        content: "Missing someone shows how much they mean to you. Here are heartfelt ways to let them know:",
+        timestamp: new Date(),
+        suggestions: [
+          "You've been on my mind all day. I miss our time together.",
+          "Distance only makes me appreciate you more. Thinking of you.",
+          "I find myself smiling remembering our moments. Miss you.",
+        ],
+        emotion: "loving",
+      };
+    }
+
+    if (lowered.includes("encourage") || lowered.includes("support")) {
+      return {
+        id: Date.now().toString(),
+        role: "assistant",
+        content: "Encouragement can make all the difference! Here are some uplifting messages:",
+        timestamp: new Date(),
+        suggestions: [
+          "I believe in you completely. You've got this!",
+          "Remember how strong you are. I'm cheering for you always.",
+          "Whatever happens, know that I'm proud of you and here for you.",
+        ],
+        emotion: "hopeful",
+      };
+    }
+
+    // Default response
+    return {
+      id: Date.now().toString(),
+      role: "assistant",
+      content: `I can help you express that! Based on what you've shared, here are some suggestions${selectedContact ? ` for ${selectedContact.name}` : ""}:`,
+      timestamp: new Date(),
+      suggestions: DEMO_SUGGESTIONS.slice(0, 3),
     };
-    setMessages((prev) => [...prev, avatarMessage]);
-    setIsTyping(false);
+  };
+
+  const handleSend = (text?: string) => {
+    const messageText = text || input;
+    if (!messageText.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: messageText,
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsTyping(true);
+
+    // Simulate AI response delay
+    setTimeout(() => {
+      const response = generateResponse(messageText);
+      setMessages((prev) => [...prev, response]);
+      setIsTyping(false);
+    }, 1000);
+  };
+
+  const handleCopy = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleQuickPrompt = (prompt: string) => {
+    handleSend(prompt);
   };
 
   return (
-    <div className="h-[calc(100vh-7rem)] flex gap-4">
-      {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg">
-                <Bot className="w-6 h-6 text-white" />
-              </div>
-              <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white" />
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold text-slate-900">HeartSpeak Avatar</h1>
-              <p className="text-xs text-emerald-600 flex items-center gap-1">
-                <Zap className="w-3 h-3" />
-                Active & Learning from you
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="w-9 h-9">
-              <Volume2 className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="w-9 h-9">
-              <RotateCcw className="w-4 h-4" />
-            </Button>
-            <Button variant="outline" size="sm">
-              <Settings className="w-4 h-4" />
-              Customize
-            </Button>
+    <div className="h-[calc(100vh-8rem)] flex gap-4">
+      {/* Sidebar */}
+      <div className="w-72 flex flex-col">
+        <div className="mb-4">
+          <h1 className="text-xl font-semibold text-slate-900">AI Avatar</h1>
+          <p className="text-sm text-slate-500">Your communication assistant</p>
+        </div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          {[
+            { icon: MessageCircle, label: "Messages", value: "156" },
+            { icon: Heart, label: "Sent", value: "42" },
+            { icon: Users, label: "Contacts", value: "8" },
+            { icon: Sparkles, label: "AI Helps", value: "89" },
+          ].map((stat) => (
+            <Card key={stat.label}>
+              <CardContent className="p-3 text-center">
+                <stat.icon className="w-4 h-4 mx-auto text-primary mb-1" />
+                <p className="text-lg font-semibold text-slate-900">{stat.value}</p>
+                <p className="text-xs text-slate-500">{stat.label}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Contacts */}
+        <div className="flex-1">
+          <h3 className="text-sm font-medium text-slate-700 mb-2">Send to:</h3>
+          <div className="space-y-2">
+            {CONTACTS.map((contact) => (
+              <Card
+                key={contact.id}
+                className={`cursor-pointer transition-colors ${
+                  selectedContact?.id === contact.id ? "border-primary bg-primary/5" : "hover:border-slate-300"
+                }`}
+                onClick={() => setSelectedContact(contact)}
+              >
+                <CardContent className="p-3 flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-medium text-sm">
+                    {contact.avatar}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-slate-900 text-sm">{contact.name}</p>
+                    <p className="text-xs text-slate-500">{contact.relationship}</p>
+                  </div>
+                  {selectedContact?.id === contact.id && (
+                    <Check className="w-4 h-4 text-primary" />
+                  )}
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
 
-        {/* Chat Container */}
-        <Card className="flex-1 flex flex-col overflow-hidden">
-          {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
-            {messages.map((message) => (
-              <div 
-                key={message.id} 
-                className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+        {/* Quick Prompts */}
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-slate-700 mb-2">Quick prompts:</h3>
+          <div className="flex flex-wrap gap-1.5">
+            {QUICK_PROMPTS.map((prompt) => (
+              <button
+                key={prompt}
+                onClick={() => handleQuickPrompt(prompt)}
+                className="px-2.5 py-1 text-xs rounded-md bg-white border border-slate-200 text-slate-600 hover:border-primary hover:text-primary transition-colors"
               >
-                {message.sender === "avatar" && (
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mr-3 flex-shrink-0 mt-1">
-                    <Bot className="w-4 h-4 text-primary" />
-                  </div>
-                )}
-                <div className={`max-w-[70%] ${message.sender === "user" ? "order-1" : ""}`}>
-                  <div 
-                    className={`px-4 py-3 rounded-2xl ${
-                      message.sender === "user" 
-                        ? "bg-primary text-white rounded-br-md" 
-                        : "bg-white text-slate-900 rounded-bl-md shadow-sm border border-slate-100"
-                    }`}
-                  >
-                    <p className="text-sm leading-relaxed">{message.content}</p>
-                  </div>
-                  <div 
-                    className={`flex items-center gap-2 mt-1.5 px-1 ${
-                      message.sender === "user" ? "justify-end" : "justify-start"
-                    }`}
-                  >
-                    <span className="text-xs text-slate-400">{message.time}</span>
-                    {message.sender === "avatar" && (
-                      <div className="flex items-center gap-1">
-                        <button className="p-1 hover:bg-slate-100 rounded transition-colors">
-                          <ThumbsUp className="w-3 h-3 text-slate-400 hover:text-primary" />
-                        </button>
-                        <button className="p-1 hover:bg-slate-100 rounded transition-colors">
-                          <ThumbsDown className="w-3 h-3 text-slate-400 hover:text-slate-600" />
-                        </button>
-                        <button className="p-1 hover:bg-slate-100 rounded transition-colors">
-                          <Copy className="w-3 h-3 text-slate-400 hover:text-primary" />
-                        </button>
+                {prompt}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Chat Area */}
+      <div className="flex-1 flex flex-col bg-white rounded-xl border border-slate-200 overflow-hidden">
+        {/* Chat Header */}
+        <div className="p-4 border-b border-slate-200 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-teal-500 flex items-center justify-center">
+              <Bot className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="font-medium text-slate-900">HeartSpeak Assistant</h2>
+              <p className="text-xs text-green-500 flex items-center gap-1">
+                <Brain className="w-3 h-3" /> AI-powered • Always here to help
+              </p>
+            </div>
+          </div>
+          {selectedContact && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full">
+              <span className="text-sm text-primary">
+                Writing to: {selectedContact.name}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 p-4 space-y-4 overflow-y-auto bg-slate-50">
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            >
+              <div className={`max-w-[80%] ${msg.role === "user" ? "order-2" : ""}`}>
+                {msg.role === "assistant" ? (
+                  <div className="space-y-3">
+                    <div className="bg-white rounded-2xl rounded-bl-sm p-4 shadow-sm border border-slate-100">
+                      <p className="text-sm text-slate-800">{msg.content}</p>
+                    </div>
+                    
+                    {msg.suggestions && (
+                      <div className="space-y-2 ml-2">
+                        {msg.suggestions.map((suggestion, i) => (
+                          <div
+                            key={i}
+                            className="bg-gradient-to-r from-primary/10 to-teal-50 rounded-lg p-3 border border-primary/20"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <p className="text-sm text-slate-700 flex-1">&quot;{suggestion}&quot;</p>
+                              <div className="flex gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7"
+                                  onClick={() => handleCopy(suggestion, `${msg.id}-${i}`)}
+                                >
+                                  {copiedId === `${msg.id}-${i}` ? (
+                                    <Check className="w-3.5 h-3.5 text-green-500" />
+                                  ) : (
+                                    <Copy className="w-3.5 h-3.5 text-slate-400" />
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <Button
+                                variant="primary"
+                                size="sm"
+                                className="text-xs h-7"
+                                onClick={() => handleCopy(suggestion, `${msg.id}-${i}`)}
+                              >
+                                <Send className="w-3 h-3 mr-1" /> Use This
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7">
+                                <ThumbsUp className="w-3.5 h-3.5 text-slate-400" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7">
+                                <ThumbsDown className="w-3.5 h-3.5 text-slate-400" />
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-7 w-7">
+                                <RefreshCw className="w-3.5 h-3.5 text-slate-400" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
-                </div>
-              </div>
-            ))}
-
-            {/* Typing Indicator */}
-            {isTyping && (
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-4 h-4 text-primary" />
-                </div>
-                <div className="bg-white rounded-2xl rounded-bl-md px-4 py-3 shadow-sm border border-slate-100">
-                  <div className="flex gap-1.5">
-                    {[0, 1, 2].map((i) => (
-                      <span 
-                        key={i} 
-                        className="w-2 h-2 rounded-full bg-primary/40 animate-bounce" 
-                        style={{ animationDelay: `${i * 0.15}s` }} 
-                      />
-                    ))}
+                ) : (
+                  <div className="bg-primary text-white rounded-2xl rounded-br-sm p-4">
+                    <p className="text-sm">{msg.content}</p>
                   </div>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {isTyping && (
+            <div className="flex justify-start">
+              <div className="bg-white rounded-2xl rounded-bl-sm p-4 shadow-sm border border-slate-100">
+                <div className="flex gap-1">
+                  <span className="w-2 h-2 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-2 h-2 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-2 h-2 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                 </div>
               </div>
-            )}
-            <div ref={messagesEndRef} />
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input Area */}
+        <div className="p-4 border-t border-slate-200 bg-white">
+          <div className="flex items-center gap-2 mb-2">
+            <Lightbulb className="w-4 h-4 text-amber-500" />
+            <span className="text-xs text-slate-500">
+              Tell me how you&apos;re feeling or what you want to say, and I&apos;ll help craft the perfect message.
+            </span>
           </div>
-
-          {/* Suggested Prompts */}
-          <div className="px-4 py-3 border-t border-slate-100 bg-white">
-            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-              {suggestedPrompts.map((prompt, index) => (
-                <button 
-                  key={index} 
-                  onClick={() => setInputValue(prompt.text)} 
-                  className="flex items-center gap-2 flex-shrink-0 px-3 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-primary/30 rounded-full text-sm text-slate-700 transition-all hover:shadow-sm"
-                >
-                  <span>{prompt.icon}</span>
-                  <span>{prompt.text}</span>
-                </button>
-              ))}
-            </div>
+          <div className="flex gap-2">
+            <Input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Type your message or describe your feelings..."
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              className="flex-1"
+            />
+            <Button variant="primary" onClick={() => handleSend()} disabled={!input.trim()}>
+              <Send className="w-4 h-4" />
+            </Button>
           </div>
-
-          {/* Input Area */}
-          <div className="p-4 border-t border-slate-200 bg-white">
-            <div className="flex items-center gap-3">
-              <Button variant="outline" size="icon" className="w-10 h-10 rounded-full flex-shrink-0">
-                <Mic className="w-4 h-4" />
-              </Button>
-              <div className="flex-1 relative">
-                <Input 
-                  value={inputValue} 
-                  onChange={(e) => setInputValue(e.target.value)} 
-                  onKeyPress={(e) => e.key === "Enter" && handleSend()} 
-                  placeholder="Tell me how you're feeling..." 
-                  className="pr-12 h-11 rounded-full bg-slate-50 border-slate-200 focus:bg-white"
-                />
-              </div>
-              <Button 
-                variant="primary" 
-                size="icon" 
-                onClick={handleSend} 
-                disabled={!inputValue.trim()} 
-                className="w-10 h-10 rounded-full flex-shrink-0"
-              >
-                <Send className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Right Sidebar - Hidden on smaller screens */}
-      <div className="w-80 flex-shrink-0 space-y-4 hidden xl:block">
-        {/* Avatar Stats Card */}
-        <Card className="overflow-hidden">
-          <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 text-center">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary-dark mx-auto mb-4 flex items-center justify-center shadow-lg relative">
-              <Bot className="w-10 h-10 text-white" />
-              <div className="absolute -top-1 -right-1 w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center">
-                <Sparkles className="w-3 h-3 text-white" />
-              </div>
-            </div>
-            <h3 className="font-semibold text-slate-900 mb-1">Your Personal Avatar</h3>
-            <p className="text-xs text-slate-500 mb-4">Continuously learning your style</p>
-            <div className="flex items-center justify-center gap-6">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-primary">94%</p>
-                <p className="text-xs text-slate-500">Accuracy</p>
-              </div>
-              <div className="w-px h-10 bg-slate-200" />
-              <div className="text-center">
-                <p className="text-2xl font-bold text-primary">48</p>
-                <p className="text-xs text-slate-500">Patterns</p>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Personality Traits */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Heart className="w-4 h-4 text-primary" />
-              <h3 className="font-medium text-slate-900">Personality Traits</h3>
-            </div>
-            <div className="space-y-3">
-              {personalityTraits.map((item) => (
-                <div key={item.trait}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-sm text-slate-600">{item.trait}</span>
-                    <span className="text-xs font-semibold text-primary">{item.level}%</span>
-                  </div>
-                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-primary to-primary-light rounded-full transition-all duration-500" 
-                      style={{ width: `${item.level}%` }} 
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Learning Progress */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Brain className="w-4 h-4 text-primary" />
-              <h3 className="font-medium text-slate-900">Learning Progress</h3>
-            </div>
-            <div className="space-y-3">
-              {learningProgress.map((item) => (
-                <div key={item.category} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
-                  <div>
-                    <p className="text-sm font-medium text-slate-900">{item.category}</p>
-                    <p className="text-xs text-slate-500">{item.patterns} patterns learned</p>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-emerald-600">
-                    <TrendingUp className="w-4 h-4" />
-                    <span className="text-sm font-semibold">{item.accuracy}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Quick Tip */}
-        <Card className="bg-amber-50 border-amber-200">
-          <CardContent className="p-4">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
-                <Sparkles className="w-4 h-4 text-amber-600" />
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-amber-900 mb-1">Pro Tip</h4>
-                <p className="text-xs text-amber-700">
-                  The more you chat, the better I understand your emotional language. Try describing your feelings in detail!
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        </div>
       </div>
     </div>
   );
