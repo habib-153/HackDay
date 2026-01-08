@@ -12,6 +12,7 @@ declare const _default: {
     cloudinary_api_secret: string | undefined;
     sender_email: string | undefined;
     sender_app_pass: string | undefined;
+    daily_api_key: string | undefined;
 };
 export default _default;
 //# sourceMappingURL=index.d.ts.map
