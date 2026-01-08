@@ -1,101 +1,69 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Quote } from "lucide-react";
 
 const testimonials = [
   {
-    quote:
-      "HeartSpeak changed how I connect with my family. For the first time, they truly understand what I'm feeling without me struggling to type everything.",
+    quote: "HeartSpeak changed how I connect with my family. They finally understand what I'm feeling.",
     author: "Sarah M.",
-    role: "User since 2024",
-    avatar: "S",
-    gradient: "from-coral to-peach",
+    role: "User",
   },
   {
-    quote:
-      "The emotion avatar knows me better than I know myself sometimes. It suggests exactly what I want to say when I can't find the words.",
+    quote: "The emotion avatar knows exactly what I want to say when I can't find the words.",
     author: "David K.",
     role: "Daily user",
-    avatar: "D",
-    gradient: "from-teal-dark to-teal",
   },
   {
-    quote:
-      "Video calls were always hard for me. Now, my friends can see my emotions in real-time through the AI translations. It's like magic.",
+    quote: "Video calls were hard. Now my friends see my emotions in real-time. It's incredible.",
     author: "Emily R.",
-    role: "Communication advocate",
-    avatar: "E",
-    gradient: "from-lavender to-rose",
+    role: "Advocate",
   },
 ];
 
 export function Testimonials() {
   return (
-    <section className="py-24 md:py-32 bg-white">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        {/* Section Header */}
+    <section className="py-24 bg-slate-50">
+      <div className="max-w-6xl mx-auto px-6">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center max-w-3xl mx-auto mb-16"
+          className="text-center mb-16"
         >
-          <span className="inline-block text-sm font-semibold text-lavender uppercase tracking-wider mb-4">
+          <p className="text-sm font-medium text-primary uppercase tracking-wider mb-3">
             Testimonials
-          </span>
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-            Stories from the{" "}
-            <span className="text-gradient-warm">Heart</span>
-          </h2>
-          <p className="text-lg text-slate-600 leading-relaxed">
-            Real experiences from people who found their voice through HeartSpeak.
           </p>
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+            Stories from Our Users
+          </h2>
         </motion.div>
 
-        {/* Testimonials Grid */}
-        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+        {/* Grid */}
+        <div className="grid md:grid-cols-3 gap-6">
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={testimonial.author}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-white rounded-lg border border-slate-200 p-6"
             >
-              <Card variant="bordered" className="h-full relative">
-                {/* Quote Icon */}
-                <div className="absolute -top-4 left-6">
-                  <div
-                    className={`w-10 h-10 rounded-xl bg-gradient-to-br ${testimonial.gradient} flex items-center justify-center shadow-lg`}
-                  >
-                    <Quote className="w-4 h-4 text-white" />
-                  </div>
+              <Quote className="w-8 h-8 text-primary/20 mb-4" />
+              <p className="text-slate-600 mb-6 leading-relaxed">
+                "{testimonial.quote}"
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm">
+                  {testimonial.author[0]}
                 </div>
-
-                <CardContent className="p-8 pt-10">
-                  <p className="text-slate-600 leading-relaxed mb-8 italic">
-                    &ldquo;{testimonial.quote}&rdquo;
-                  </p>
-
-                  {/* Author */}
-                  <div className="flex items-center gap-4">
-                    <div
-                      className={`w-12 h-12 rounded-full bg-gradient-to-br ${testimonial.gradient} flex items-center justify-center text-white font-semibold`}
-                    >
-                      {testimonial.avatar}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-foreground">
-                        {testimonial.author}
-                      </p>
-                      <p className="text-sm text-slate-500">{testimonial.role}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                <div>
+                  <p className="font-medium text-slate-900 text-sm">{testimonial.author}</p>
+                  <p className="text-slate-500 text-xs">{testimonial.role}</p>
+                </div>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -103,4 +71,3 @@ export function Testimonials() {
     </section>
   );
 }
-

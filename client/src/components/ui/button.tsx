@@ -5,7 +5,7 @@ import { motion, HTMLMotionProps } from "framer-motion";
 import { forwardRef } from "react";
 
 interface ButtonProps extends Omit<HTMLMotionProps<"button">, "ref"> {
-  variant?: "primary" | "secondary" | "outline" | "ghost" | "teal" | "destructive";
+  variant?: "primary" | "secondary" | "outline" | "ghost" | "destructive";
   size?: "sm" | "md" | "lg" | "xl" | "icon";
   isLoading?: boolean;
 }
@@ -24,27 +24,26 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      "inline-flex items-center justify-center gap-2 font-medium rounded-full transition-all duration-200 focus-ring";
+      "inline-flex items-center justify-center gap-2 font-medium rounded-md transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2";
 
     const variants = {
       primary:
-        "bg-gradient-to-r from-coral to-peach text-white hover:shadow-lg hover:shadow-coral/25 hover:scale-[1.02] active:scale-[0.98]",
+        "bg-primary text-white hover:bg-primary-dark active:bg-primary-dark",
       secondary:
-        "bg-slate-800 text-white hover:bg-slate-700 hover:shadow-lg active:scale-[0.98]",
+        "bg-slate-800 text-white hover:bg-slate-700 active:bg-slate-900",
       outline:
-        "border-2 border-slate-200 bg-transparent text-foreground hover:border-coral hover:text-coral active:scale-[0.98]",
+        "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-400 active:bg-slate-100",
       ghost:
-        "bg-transparent text-foreground hover:bg-slate-100 active:scale-[0.98]",
-      teal: "bg-gradient-to-r from-teal-dark to-teal text-white hover:shadow-lg hover:shadow-teal/25 hover:scale-[1.02] active:scale-[0.98]",
+        "bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 active:bg-slate-200",
       destructive:
-        "bg-red-500 text-white hover:bg-red-600 hover:shadow-lg hover:shadow-red-500/25 active:scale-[0.98]",
+        "bg-red-600 text-white hover:bg-red-700 active:bg-red-800",
     };
 
     const sizes = {
-      sm: "h-9 px-4 text-sm",
-      md: "h-11 px-6 text-sm",
-      lg: "h-12 px-8 text-base",
-      xl: "h-14 px-10 text-lg",
+      sm: "h-8 px-3 text-sm",
+      md: "h-10 px-4 text-sm",
+      lg: "h-11 px-6 text-sm",
+      xl: "h-12 px-8 text-base",
       icon: "h-10 w-10 p-0",
     };
 
@@ -55,7 +54,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           baseStyles,
           variants[variant],
           sizes[size],
-          (disabled || isLoading) && "opacity-50 cursor-not-allowed",
+          (disabled || isLoading) && "opacity-50 cursor-not-allowed pointer-events-none",
           className
         )}
         disabled={disabled || isLoading}
@@ -97,4 +96,3 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = "Button";
 
 export { Button };
-

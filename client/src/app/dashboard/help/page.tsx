@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,117 +9,53 @@ import {
   Search,
   Book,
   Video,
-  MessageCircle,
+  MessageSquare,
   ChevronRight,
   ChevronDown,
   Mail,
-  Heart,
   Palette,
   Bot,
-  Phone,
-  ExternalLink,
   Play,
+  ExternalLink,
 } from "lucide-react";
 
-// FAQ categories
 const faqCategories = [
   {
-    id: "getting-started",
-    title: "Getting Started",
-    icon: Book,
+    id: "getting-started", title: "Getting Started", icon: Book,
     faqs: [
-      {
-        question: "How do I create my first emotion message?",
-        answer:
-          "Go to the Chat section, click on the heart icon to open the Emotion Composer. Select your primary emotion, adjust the intensity, and optionally add context. The AI will craft a message that authentically represents your feelings.",
-      },
-      {
-        question: "What is the AI Avatar?",
-        answer:
-          "Your AI Avatar is a personal companion that learns your emotional patterns and communication style. The more you use HeartSpeak, the better it understands how you express yourself, helping you communicate more effectively.",
-      },
-      {
-        question: "How does emotion recognition work in video calls?",
-        answer:
-          "During video calls, our AI analyzes your facial expressions every 2-3 seconds using advanced emotion recognition. It translates detected emotions into natural language that appears on the other person's screen, helping them understand your feelings.",
-      },
+      { question: "How do I create my first emotion message?", answer: "Go to Chat, click the heart icon to open the Emotion Composer. Select your emotion, adjust intensity, and optionally add context. The AI will craft your message." },
+      { question: "What is the AI Avatar?", answer: "Your AI Avatar is a personal companion that learns your emotional patterns and communication style to help you express yourself better." },
+      { question: "How does emotion recognition work?", answer: "During video calls, our AI analyzes facial expressions every 2-3 seconds and translates detected emotions into natural language." },
     ],
   },
   {
-    id: "patterns",
-    title: "Pattern Language",
-    icon: Palette,
+    id: "patterns", title: "Patterns", icon: Palette,
     faqs: [
-      {
-        question: "How do I create an emotion pattern?",
-        answer:
-          "Navigate to Patterns, click 'Create Pattern', and use the drawing canvas to create your visual representation. Choose colors, add shapes, and associate it with an emotion. The AI will learn to recognize your pattern in future conversations.",
-      },
-      {
-        question: "Can others understand my patterns?",
-        answer:
-          "Yes! When you send a pattern to someone, the AI interprets it based on your personal pattern language and provides a translation that helps the recipient understand the emotion you're expressing.",
-      },
+      { question: "How do I create an emotion pattern?", answer: "Navigate to Patterns, click 'Create Pattern', use the drawing canvas, choose colors and shapes, then associate it with an emotion." },
+      { question: "Can others understand my patterns?", answer: "Yes! When you send a pattern, the AI interprets it based on your personal pattern language and provides a translation." },
     ],
   },
   {
-    id: "video-calls",
-    title: "Video Calls",
-    icon: Video,
+    id: "video-calls", title: "Video Calls", icon: Video,
     faqs: [
-      {
-        question: "How accurate is the emotion detection?",
-        answer:
-          "Our emotion recognition achieves approximately 85-95% accuracy for common emotions. It works best with good lighting and a clear view of your face. The system continuously improves as you use it.",
-      },
-      {
-        question: "Is my video data stored?",
-        answer:
-          "No. Video frames are processed in real-time and immediately discarded after emotion analysis. We never store your video footage or facial images. Your privacy is our top priority.",
-      },
+      { question: "How accurate is emotion detection?", answer: "Our recognition achieves 85-95% accuracy for common emotions. It works best with good lighting and clear face visibility." },
+      { question: "Is my video data stored?", answer: "No. Video frames are processed in real-time and immediately discarded. We never store video footage or facial images." },
     ],
   },
   {
-    id: "avatar",
-    title: "AI Avatar",
-    icon: Bot,
+    id: "avatar", title: "AI Avatar", icon: Bot,
     faqs: [
-      {
-        question: "How does the avatar learn from me?",
-        answer:
-          "Your avatar learns from your patterns, messages, and emotional expressions over time. It analyzes your communication style, preferred expressions, and emotional patterns to provide personalized assistance.",
-      },
-      {
-        question: "Can I reset my avatar's learning?",
-        answer:
-          "Yes, you can reset your avatar's learned patterns in Settings > AI Avatar. Keep in mind this will remove all personalization, and your avatar will need to relearn your preferences.",
-      },
+      { question: "How does the avatar learn?", answer: "Your avatar learns from your patterns, messages, and expressions over time, analyzing your communication style and preferences." },
+      { question: "Can I reset my avatar's learning?", answer: "Yes, you can reset in Settings > AI Avatar. Note that this removes all personalization." },
     ],
   },
 ];
 
-// Video tutorials
 const tutorials = [
-  {
-    title: "Getting Started with HeartSpeak",
-    duration: "5:30",
-    thumbnail: "gradient-coral",
-  },
-  {
-    title: "Creating Your First Pattern",
-    duration: "3:45",
-    thumbnail: "gradient-teal",
-  },
-  {
-    title: "Emotion Video Calls Explained",
-    duration: "4:20",
-    thumbnail: "gradient-lavender",
-  },
-  {
-    title: "Training Your AI Avatar",
-    duration: "6:15",
-    thumbnail: "gradient-amber",
-  },
+  { title: "Getting Started with HeartSpeak", duration: "5:30", color: "#10B981" },
+  { title: "Creating Your First Pattern", duration: "3:45", color: "#3B82F6" },
+  { title: "Emotion Video Calls Explained", duration: "4:20", color: "#8B5CF6" },
+  { title: "Training Your AI Avatar", duration: "6:15", color: "#F59E0B" },
 ];
 
 export default function HelpPage() {
@@ -135,240 +70,118 @@ export default function HelpPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="text-center max-w-2xl mx-auto">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-coral to-peach mx-auto mb-4 flex items-center justify-center shadow-lg shadow-coral/20">
-          <HelpCircle className="w-8 h-8 text-white" />
+      <div className="text-center max-w-xl mx-auto">
+        <div className="w-12 h-12 rounded-md bg-primary/10 mx-auto mb-3 flex items-center justify-center">
+          <HelpCircle className="w-6 h-6 text-primary" />
         </div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          How can we help you?
-        </h1>
-        <p className="text-slate-500 mb-6">
-          Find answers, watch tutorials, or reach out to our support team
-        </p>
-
-        {/* Search */}
-        <div className="relative max-w-lg mx-auto">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search for help..."
-            className="pl-12 h-14 text-lg"
-          />
+        <h1 className="text-2xl font-semibold text-slate-900 mb-1">How can we help?</h1>
+        <p className="text-sm text-slate-500 mb-4">Find answers, watch tutorials, or contact support</p>
+        <div className="relative max-w-md mx-auto">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search for help..." className="pl-9 h-10" />
         </div>
       </div>
 
       {/* Quick Links */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          {
-            icon: Book,
-            title: "User Guide",
-            description: "Complete documentation",
-            color: "coral",
-          },
-          {
-            icon: Video,
-            title: "Video Tutorials",
-            description: "Learn step by step",
-            color: "teal",
-          },
-          {
-            icon: MessageCircle,
-            title: "Community",
-            description: "Join discussions",
-            color: "lavender",
-          },
-          {
-            icon: Mail,
-            title: "Contact Support",
-            description: "Get personal help",
-            color: "amber",
-          },
-        ].map((link, index) => (
-          <motion.div
-            key={link.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-          >
-            <Card hover className="cursor-pointer h-full">
-              <CardContent className="p-6">
-                <div
-                  className={`w-12 h-12 rounded-xl bg-${link.color}/10 flex items-center justify-center mb-4`}
-                >
-                  <link.icon className={`w-6 h-6 text-${link.color}`} />
-                </div>
-                <h3 className="font-semibold text-foreground mb-1">
-                  {link.title}
-                </h3>
-                <p className="text-sm text-slate-500">{link.description}</p>
-              </CardContent>
-            </Card>
-          </motion.div>
+          { icon: Book, title: "User Guide", desc: "Documentation", color: "text-primary" },
+          { icon: Video, title: "Tutorials", desc: "Step by step", color: "text-blue-500" },
+          { icon: MessageSquare, title: "Community", desc: "Join discussions", color: "text-purple-500" },
+          { icon: Mail, title: "Support", desc: "Get help", color: "text-amber-500" },
+        ].map((link) => (
+          <Card key={link.title} hover className="cursor-pointer">
+            <CardContent className="p-4">
+              <div className="w-9 h-9 rounded-md bg-slate-100 flex items-center justify-center mb-3">
+                <link.icon className={`w-4 h-4 ${link.color}`} />
+              </div>
+              <h3 className="font-medium text-slate-900 text-sm mb-0.5">{link.title}</h3>
+              <p className="text-xs text-slate-500">{link.desc}</p>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* FAQ Section */}
+      <div className="grid lg:grid-cols-3 gap-4">
+        {/* FAQ */}
         <div className="lg:col-span-2">
           <Card>
-            <CardContent className="p-6">
-              <h2 className="text-xl font-semibold text-foreground mb-6">
-                Frequently Asked Questions
-              </h2>
-
-              {/* Category Tabs */}
-              <div className="flex gap-2 overflow-x-auto pb-4 mb-6">
+            <CardContent className="p-4">
+              <h2 className="font-medium text-slate-900 mb-4">FAQ</h2>
+              
+              <div className="flex gap-2 overflow-x-auto pb-3 mb-4">
                 {faqCategories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => setActiveCategory(category.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${
-                      activeCategory === category.id
-                        ? "bg-coral text-white"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    }`}
-                  >
+                  <button key={category.id} onClick={() => setActiveCategory(category.id)} className={`flex items-center gap-2 px-3 py-1.5 rounded-md whitespace-nowrap transition-colors text-sm ${activeCategory === category.id ? "bg-primary text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>
                     <category.icon className="w-4 h-4" />
-                    <span className="text-sm font-medium">{category.title}</span>
+                    <span>{category.title}</span>
                   </button>
                 ))}
               </div>
 
-              {/* FAQ Items */}
-              <div className="space-y-3">
-                {faqCategories
-                  .find((c) => c.id === activeCategory)
-                  ?.faqs.map((faq, index) => {
-                    const faqId = `${activeCategory}-${index}`;
-                    return (
-                      <motion.div
-                        key={faqId}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="border border-slate-200 rounded-xl overflow-hidden"
-                      >
-                        <button
-                          onClick={() => toggleFaq(faqId)}
-                          className="w-full flex items-center justify-between p-4 text-left hover:bg-slate-50 transition-colors"
-                        >
-                          <span className="font-medium text-foreground pr-4">
-                            {faq.question}
-                          </span>
-                          <ChevronDown
-                            className={`w-5 h-5 text-slate-400 transition-transform flex-shrink-0 ${
-                              expandedFaq === faqId ? "rotate-180" : ""
-                            }`}
-                          />
-                        </button>
-                        {expandedFaq === faqId && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="px-4 pb-4"
-                          >
-                            <p className="text-slate-600 leading-relaxed">
-                              {faq.answer}
-                            </p>
-                          </motion.div>
-                        )}
-                      </motion.div>
-                    );
-                  })}
+              <div className="space-y-2">
+                {faqCategories.find((c) => c.id === activeCategory)?.faqs.map((faq, index) => {
+                  const faqId = `${activeCategory}-${index}`;
+                  return (
+                    <div key={faqId} className="border border-slate-200 rounded-md overflow-hidden">
+                      <button onClick={() => toggleFaq(faqId)} className="w-full flex items-center justify-between p-3 text-left hover:bg-slate-50 transition-colors">
+                        <span className="text-sm font-medium text-slate-900 pr-4">{faq.question}</span>
+                        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform flex-shrink-0 ${expandedFaq === faqId ? "rotate-180" : ""}`} />
+                      </button>
+                      {expandedFaq === faqId && (
+                        <div className="px-3 pb-3">
+                          <p className="text-sm text-slate-600">{faq.answer}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Right Sidebar */}
-        <div className="space-y-6">
-          {/* Video Tutorials */}
+        {/* Sidebar */}
+        <div className="space-y-4">
           <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-foreground">Video Tutorials</h3>
-                <Button variant="ghost" size="sm">
-                  View All
-                  <ExternalLink className="w-4 h-4" />
-                </Button>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-medium text-slate-900">Tutorials</h3>
+                <Button variant="ghost" size="sm" className="text-xs"><ExternalLink className="w-3 h-3" />All</Button>
               </div>
-              <div className="space-y-3">
-                {tutorials.map((tutorial, index) => (
-                  <motion.div
-                    key={tutorial.title}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors group"
-                  >
-                    <div
-                      className={`w-16 h-12 rounded-lg bg-${tutorial.thumbnail} flex items-center justify-center relative overflow-hidden`}
-                      style={{
-                        background:
-                          tutorial.thumbnail === "gradient-coral"
-                            ? "linear-gradient(135deg, #F87171, #FBBF24)"
-                            : tutorial.thumbnail === "gradient-teal"
-                            ? "linear-gradient(135deg, #14B8A6, #5EEAD4)"
-                            : tutorial.thumbnail === "gradient-lavender"
-                            ? "linear-gradient(135deg, #A78BFA, #F0ABFC)"
-                            : "linear-gradient(135deg, #FBBF24, #FB923C)",
-                      }}
-                    >
-                      <Play className="w-5 h-5 text-white group-hover:scale-125 transition-transform" />
+              <div className="space-y-2">
+                {tutorials.map((tutorial) => (
+                  <div key={tutorial.title} className="flex items-center gap-3 p-2 rounded-md hover:bg-slate-50 cursor-pointer transition-colors group">
+                    <div className="w-12 h-9 rounded-md flex items-center justify-center" style={{ backgroundColor: tutorial.color }}>
+                      <Play className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {tutorial.title}
-                      </p>
+                      <p className="text-sm font-medium text-slate-900 truncate">{tutorial.title}</p>
                       <p className="text-xs text-slate-500">{tutorial.duration}</p>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </CardContent>
           </Card>
 
-          {/* Contact Support */}
-          <Card className="bg-gradient-to-br from-coral/10 to-peach/10 border-coral/20">
-            <CardContent className="p-6 text-center">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-coral to-peach mx-auto mb-4 flex items-center justify-center shadow-lg shadow-coral/20">
-                <MessageCircle className="w-7 h-7 text-white" />
+          <Card>
+            <CardContent className="p-4 text-center">
+              <div className="w-10 h-10 rounded-md bg-primary/10 mx-auto mb-3 flex items-center justify-center">
+                <MessageSquare className="w-5 h-5 text-primary" />
               </div>
-              <h3 className="font-semibold text-foreground mb-2">
-                Still need help?
-              </h3>
-              <p className="text-sm text-slate-500 mb-4">
-                Our support team is here to assist you with any questions
-              </p>
-              <Button variant="primary" className="w-full">
-                <Mail className="w-5 h-5" />
-                Contact Support
-              </Button>
+              <h3 className="font-medium text-slate-900 mb-1">Need help?</h3>
+              <p className="text-xs text-slate-500 mb-3">Our team is here to assist</p>
+              <Button variant="primary" className="w-full"><Mail className="w-4 h-4" />Contact Support</Button>
             </CardContent>
           </Card>
 
-          {/* Useful Links */}
           <Card>
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-foreground mb-4">
-                Useful Links
-              </h3>
-              <div className="space-y-2">
-                {[
-                  { label: "Privacy Policy", href: "#" },
-                  { label: "Terms of Service", href: "#" },
-                  { label: "Accessibility", href: "#" },
-                  { label: "System Status", href: "#" },
-                ].map((link) => (
-                  <a
-                    key={link.label}
-                    href={link.href}
-                    className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 text-slate-600 hover:text-coral transition-colors"
-                  >
-                    <span className="text-sm">{link.label}</span>
+            <CardContent className="p-4">
+              <h3 className="font-medium text-slate-900 mb-3">Useful Links</h3>
+              <div className="space-y-1">
+                {["Privacy Policy", "Terms of Service", "Accessibility", "System Status"].map((link) => (
+                  <a key={link} href="#" className="flex items-center justify-between p-2 rounded-md hover:bg-slate-50 text-sm text-slate-600 hover:text-primary transition-colors">
+                    <span>{link}</span>
                     <ChevronRight className="w-4 h-4" />
                   </a>
                 ))}

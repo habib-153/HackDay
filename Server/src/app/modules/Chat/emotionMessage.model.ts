@@ -26,6 +26,18 @@ const visualStyleSchema = new Schema(
     { _id: false },
 );
 
+const patternDataSchema = new Schema(
+    {
+        patternId: { type: String, required: true, ref: 'UserPattern' },
+        imageUrl: { type: String, required: true },
+        emotion: { type: String, required: true },
+        intensity: { type: Number, required: true, min: 0, max: 1 },
+        tags: { type: [String], default: [] },
+        colorPalette: { type: [String], default: [] },
+    },
+    { _id: false },
+);
+
 const recipientReactionSchema = new Schema(
     {
         resonated: { type: Boolean, default: false },
@@ -52,13 +64,29 @@ const emotionMessageSchema = new Schema<TEmotionMessage>(
             required: [true, 'Recipient ID is required'],
             ref: 'User',
         },
+        type: {
+            type: String,
+            enum: ['emotion', 'pattern', 'text'],
+            default: 'emotion',
+        },
+        // For emotion messages
         emotionComposition: {
             type: emotionCompositionSchema,
-            required: true,
         },
+        // For pattern messages
+        patternData: {
+            type: patternDataSchema,
+        },
+        patternInterpretation: {
+            type: String,
+        },
+        // For text messages
+        textContent: {
+            type: String,
+        },
+        // Generated content
         generatedText: {
             type: String,
-            required: true,
         },
         alternativeTexts: {
             type: [String],
@@ -70,7 +98,6 @@ const emotionMessageSchema = new Schema<TEmotionMessage>(
         },
         visualStyle: {
             type: visualStyleSchema,
-            required: true,
         },
         recipientReaction: {
             type: recipientReactionSchema,

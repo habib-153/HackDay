@@ -5,24 +5,23 @@ import { motion, HTMLMotionProps } from "framer-motion";
 import { forwardRef } from "react";
 
 interface CardProps extends Omit<HTMLMotionProps<"div">, "ref"> {
-  variant?: "default" | "glass" | "elevated" | "bordered";
+  variant?: "default" | "elevated" | "bordered";
   hover?: boolean;
 }
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ className, variant = "default", hover = false, children, ...props }, ref) => {
     const variants = {
-      default: "bg-white border border-slate-100",
-      glass: "glass",
-      elevated: "bg-white shadow-lg",
-      bordered: "bg-white border-2 border-slate-200",
+      default: "bg-white border border-slate-200",
+      elevated: "bg-white shadow-md",
+      bordered: "bg-white border border-slate-200",
     };
 
     return (
       <motion.div
         ref={ref}
         className={cn(
-          "rounded-2xl p-6",
+          "rounded-lg",
           variants[variant],
           hover && "card-hover cursor-pointer",
           className
@@ -52,7 +51,7 @@ const CardTitle = forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn("text-xl font-semibold text-foreground", className)}
+    className={cn("text-lg font-semibold text-slate-900", className)}
     {...props}
   />
 ));
@@ -65,7 +64,7 @@ const CardDescription = forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-sm text-muted mt-1", className)}
+    className={cn("text-sm text-slate-500 mt-1", className)}
     {...props}
   />
 ));
@@ -82,4 +81,3 @@ const CardContent = forwardRef<
 CardContent.displayName = "CardContent";
 
 export { Card, CardHeader, CardTitle, CardDescription, CardContent };
-

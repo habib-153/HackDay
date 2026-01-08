@@ -56,10 +56,56 @@ const generateText = catchAsync(async (req, res) => {
     });
 });
 
+// Send message - handles different message types
 const sendMessage = catchAsync(async (req, res) => {
     const userId = req.user.userId;
     const { conversationId } = req.params;
-    const result = await ChatServices.sendMessage(userId, conversationId, req.body);
+    const { type, emotionComposition, visualStyle, selectedTextIndex, patternId, content } = req.body;
+
+    let result;
+
+    switch (type) {
+        case 'pattern':
+            if (!patternId) {
+                return sendResponse(res, {
+                    statusCode: httpStatus.BAD_REQUEST,
+                    success: false,
+                    message: 'Pattern ID is required for pattern messages!',
+                    data: null,
+                });
+            }
+            result = await ChatServices.sendPatternMessage(userId, conversationId, { patternId });
+            break;
+            
+        case 'text':
+            if (!content) {
+                return sendResponse(res, {
+                    statusCode: httpStatus.BAD_REQUEST,
+                    success: false,
+                    message: 'Content is required for text messages!',
+                    data: null,
+                });
+            }
+            result = await ChatServices.sendTextMessage(userId, conversationId, { content });
+            break;
+            
+        case 'emotion':
+        default:
+            if (!emotionComposition || !visualStyle) {
+                return sendResponse(res, {
+                    statusCode: httpStatus.BAD_REQUEST,
+                    success: false,
+                    message: 'Emotion composition and visual style are required!',
+                    data: null,
+                });
+            }
+            result = await ChatServices.sendEmotionMessage(userId, conversationId, {
+                emotionComposition,
+                visualStyle,
+                selectedTextIndex,
+            });
+            break;
+    }
 
     sendResponse(res, {
         statusCode: httpStatus.CREATED,

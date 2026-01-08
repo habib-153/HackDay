@@ -1,14 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Bot,
   Send,
-  Sparkles,
   Heart,
   Brain,
   Settings,
@@ -18,15 +16,11 @@ import {
   Copy,
   Volume2,
   Mic,
-  Lightbulb,
   TrendingUp,
-  MessageCircle,
-  Palette,
-  Star,
-  ChevronRight,
+  Sparkles,
+  Zap,
 } from "lucide-react";
 
-// Avatar personality traits
 const personalityTraits = [
   { trait: "Empathetic", level: 92 },
   { trait: "Patient", level: 88 },
@@ -34,29 +28,27 @@ const personalityTraits = [
   { trait: "Understanding", level: 90 },
 ];
 
-// Learning progress
 const learningProgress = [
   { category: "Your Emotions", patterns: 48, accuracy: 94 },
   { category: "Expression Style", patterns: 32, accuracy: 89 },
   { category: "Context Awareness", patterns: 56, accuracy: 91 },
 ];
 
-// Suggested prompts
 const suggestedPrompts = [
-  "Help me express gratitude to my friend",
-  "I'm feeling anxious, can you help?",
-  "Create a message for my mom",
-  "How should I share my excitement?",
+  { text: "Help me express gratitude", icon: "💝" },
+  { text: "I'm feeling anxious", icon: "😰" },
+  { text: "Create a message for my mom", icon: "👩" },
+  { text: "Share my excitement", icon: "🎉" },
+  { text: "I need to calm down", icon: "🧘" },
+  { text: "Express my love", icon: "❤️" },
 ];
 
-// Mock conversation with avatar
 const initialMessages = [
-  {
-    id: 1,
-    sender: "avatar",
-    content:
-      "Hello! 👋 I'm your personal emotion companion. I've learned a lot about how you express yourself, and I'm here to help you communicate your feelings. How are you feeling today?",
-    time: "Just now",
+  { 
+    id: 1, 
+    sender: "avatar", 
+    content: "Hello! 👋 I'm your personal emotion companion. I've been learning how you express yourself, and I'm here to help you communicate your feelings better. How are you feeling today?", 
+    time: "Just now" 
   },
 ];
 
@@ -77,350 +69,273 @@ export default function AvatarPage() {
   const handleSend = async () => {
     if (!inputValue.trim()) return;
 
-    // Add user message
-    const userMessage = {
-      id: messages.length + 1,
-      sender: "user",
-      content: inputValue,
-      time: "Just now",
-    };
+    const userMessage = { id: messages.length + 1, sender: "user", content: inputValue, time: "Just now" };
     setMessages([...messages, userMessage]);
     setInputValue("");
 
-    // Simulate avatar typing
     setIsTyping(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 1500 + Math.random() * 1000));
 
-    // Add avatar response
     const avatarResponses = [
-      "I can feel the emotion in your words. Based on what you've shared, it sounds like you're experiencing a mix of feelings. Would you like me to help you express this to someone?",
-      "That's a beautiful way to feel! I've noticed you often express this emotion through warm colors and flowing patterns. Should I suggest a way to share this with someone special?",
-      "I understand. Remember, it's okay to feel this way. Based on your patterns, I think a gentle, reassuring message would work well. Want me to help craft one?",
+      "I can sense the emotion in your words. Based on what you've shared, it sounds like you're experiencing something meaningful. Would you like me to help you express this to someone? 💭",
+      "That's a beautiful feeling to have! I've noticed you often express this emotion with warmth and sincerity. Should I help craft a message that captures this? ✨",
+      "I understand how you feel. Remember, it's completely okay to experience this. Based on your communication patterns, I think a heartfelt message would resonate well. Want me to help? 🌟",
+      "Thank you for sharing that with me. Your emotional awareness is growing - I can see it in how you articulate your feelings. How can I assist you further? 💫",
     ];
 
-    const avatarMessage = {
-      id: messages.length + 2,
-      sender: "avatar",
-      content: avatarResponses[Math.floor(Math.random() * avatarResponses.length)],
-      time: "Just now",
+    const avatarMessage = { 
+      id: messages.length + 2, 
+      sender: "avatar", 
+      content: avatarResponses[Math.floor(Math.random() * avatarResponses.length)], 
+      time: "Just now" 
     };
     setMessages((prev) => [...prev, avatarMessage]);
     setIsTyping(false);
   };
 
-  const handlePromptClick = (prompt: string) => {
-    setInputValue(prompt);
-  };
-
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">AI Avatar</h1>
-          <p className="text-slate-500">
-            Your personal emotion companion that learns from you
-          </p>
+    <div className="h-[calc(100vh-7rem)] flex gap-4">
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-lg">
+                <Bot className="w-6 h-6 text-white" />
+              </div>
+              <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white" />
+            </div>
+            <div>
+              <h1 className="text-lg font-semibold text-slate-900">HeartSpeak Avatar</h1>
+              <p className="text-xs text-emerald-600 flex items-center gap-1">
+                <Zap className="w-3 h-3" />
+                Active & Learning from you
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="w-9 h-9">
+              <Volume2 className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className="w-9 h-9">
+              <RotateCcw className="w-4 h-4" />
+            </Button>
+            <Button variant="outline" size="sm">
+              <Settings className="w-4 h-4" />
+              Customize
+            </Button>
+          </div>
         </div>
-        <Button variant="outline" size="lg">
-          <Settings className="w-5 h-5" />
-          Customize Avatar
-        </Button>
-      </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Main Chat Area */}
-        <div className="lg:col-span-2">
-          <Card className="h-[600px] flex flex-col overflow-hidden">
-            {/* Chat Header */}
-            <CardContent className="p-4 border-b border-slate-100 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <motion.div
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber to-peach flex items-center justify-center shadow-lg shadow-amber/20"
-                >
-                  <Bot className="w-6 h-6 text-white" />
-                </motion.div>
-                <div>
-                  <p className="font-semibold text-foreground">HeartSpeak Avatar</p>
-                  <p className="text-xs text-green-600 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                    Active & Learning
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon">
-                  <Volume2 className="w-5 h-5" />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <RotateCcw className="w-5 h-5" />
-                </Button>
-              </div>
-            </CardContent>
-
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.map((message) => (
-                <motion.div
-                  key={message.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`flex ${
-                    message.sender === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  {message.sender === "avatar" && (
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber to-peach flex items-center justify-center mr-2 flex-shrink-0">
-                      <Bot className="w-4 h-4 text-white" />
-                    </div>
-                  )}
-                  <div
-                    className={`max-w-md ${
-                      message.sender === "user"
-                        ? "bg-coral text-white rounded-2xl rounded-br-md"
-                        : "bg-gradient-to-br from-amber/10 to-peach/10 border border-amber/20 text-foreground rounded-2xl rounded-bl-md"
-                    } px-4 py-3`}
+        {/* Chat Container */}
+        <Card className="flex-1 flex flex-col overflow-hidden">
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50">
+            {messages.map((message) => (
+              <div 
+                key={message.id} 
+                className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+              >
+                {message.sender === "avatar" && (
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                    <Bot className="w-4 h-4 text-primary" />
+                  </div>
+                )}
+                <div className={`max-w-[70%] ${message.sender === "user" ? "order-1" : ""}`}>
+                  <div 
+                    className={`px-4 py-3 rounded-2xl ${
+                      message.sender === "user" 
+                        ? "bg-primary text-white rounded-br-md" 
+                        : "bg-white text-slate-900 rounded-bl-md shadow-sm border border-slate-100"
+                    }`}
                   >
                     <p className="text-sm leading-relaxed">{message.content}</p>
-                    <div
-                      className={`flex items-center gap-2 mt-2 ${
-                        message.sender === "user"
-                          ? "justify-end text-white/70"
-                          : "justify-start text-slate-400"
-                      }`}
-                    >
-                      <span className="text-xs">{message.time}</span>
-                      {message.sender === "avatar" && (
-                        <>
-                          <Button variant="ghost" size="icon" className="w-6 h-6">
-                            <ThumbsUp className="w-3 h-3" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="w-6 h-6">
-                            <ThumbsDown className="w-3 h-3" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="w-6 h-6">
-                            <Copy className="w-3 h-3" />
-                          </Button>
-                        </>
-                      )}
-                    </div>
                   </div>
-                </motion.div>
-              ))}
-
-              {/* Typing Indicator */}
-              <AnimatePresence>
-                {isTyping && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="flex items-center gap-2"
+                  <div 
+                    className={`flex items-center gap-2 mt-1.5 px-1 ${
+                      message.sender === "user" ? "justify-end" : "justify-start"
+                    }`}
                   >
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-amber to-peach flex items-center justify-center">
-                      <Bot className="w-4 h-4 text-white" />
-                    </div>
-                    <div className="bg-slate-100 rounded-2xl px-4 py-3">
-                      <div className="flex gap-1">
-                        {[0, 1, 2].map((i) => (
-                          <motion.span
-                            key={i}
-                            animate={{ y: [0, -5, 0] }}
-                            transition={{
-                              duration: 0.6,
-                              repeat: Infinity,
-                              delay: i * 0.1,
-                            }}
-                            className="w-2 h-2 rounded-full bg-slate-400"
-                          />
-                        ))}
+                    <span className="text-xs text-slate-400">{message.time}</span>
+                    {message.sender === "avatar" && (
+                      <div className="flex items-center gap-1">
+                        <button className="p-1 hover:bg-slate-100 rounded transition-colors">
+                          <ThumbsUp className="w-3 h-3 text-slate-400 hover:text-primary" />
+                        </button>
+                        <button className="p-1 hover:bg-slate-100 rounded transition-colors">
+                          <ThumbsDown className="w-3 h-3 text-slate-400 hover:text-slate-600" />
+                        </button>
+                        <button className="p-1 hover:bg-slate-100 rounded transition-colors">
+                          <Copy className="w-3 h-3 text-slate-400 hover:text-primary" />
+                        </button>
                       </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Suggested Prompts */}
-            <div className="px-4 pb-2">
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {suggestedPrompts.map((prompt, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handlePromptClick(prompt)}
-                    className="flex-shrink-0 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-full text-xs text-slate-600 transition-colors"
-                  >
-                    {prompt}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Input Area */}
-            <CardContent className="p-4 border-t border-slate-100">
-              <div className="flex items-center gap-3">
-                <Button variant="outline" size="icon" className="flex-shrink-0">
-                  <Mic className="w-5 h-5" />
-                </Button>
-                <Input
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                  placeholder="Tell me how you're feeling..."
-                  className="flex-1"
-                />
-                <Button
-                  variant="primary"
-                  size="icon"
-                  onClick={handleSend}
-                  disabled={!inputValue.trim()}
-                  className="flex-shrink-0"
-                >
-                  <Send className="w-5 h-5" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Sidebar */}
-        <div className="space-y-6">
-          {/* Avatar Status */}
-          <Card className="bg-gradient-to-br from-amber/10 to-peach/10 border-amber/20">
-            <CardContent className="p-6 text-center">
-              <motion.div
-                animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
-                transition={{ duration: 3, repeat: Infinity }}
-                className="w-24 h-24 rounded-3xl bg-gradient-to-br from-amber to-peach mx-auto mb-4 flex items-center justify-center shadow-xl shadow-amber/30"
-              >
-                <Bot className="w-12 h-12 text-white" />
-              </motion.div>
-              <h3 className="text-lg font-semibold text-foreground mb-1">
-                Your Avatar
-              </h3>
-              <p className="text-sm text-slate-500 mb-4">
-                Learning your emotional language
-              </p>
-              <div className="flex items-center justify-center gap-4">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-coral">94%</p>
-                  <p className="text-xs text-slate-500">Accuracy</p>
-                </div>
-                <div className="w-px h-8 bg-slate-200" />
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-teal">48</p>
-                  <p className="text-xs text-slate-500">Patterns</p>
+                    )}
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            ))}
 
-          {/* Personality Traits */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Heart className="w-5 h-5 text-coral" />
-                <h3 className="font-semibold text-foreground">
-                  Personality Traits
-                </h3>
-              </div>
-              <div className="space-y-3">
-                {personalityTraits.map((item) => (
-                  <div key={item.trait}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm text-slate-600">{item.trait}</span>
-                      <span className="text-xs font-medium text-foreground">
-                        {item.level}%
-                      </span>
-                    </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${item.level}%` }}
-                        transition={{ delay: 0.5, duration: 1 }}
-                        className="h-full bg-gradient-to-r from-coral to-peach rounded-full"
+            {/* Typing Indicator */}
+            {isTyping && (
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Bot className="w-4 h-4 text-primary" />
+                </div>
+                <div className="bg-white rounded-2xl rounded-bl-md px-4 py-3 shadow-sm border border-slate-100">
+                  <div className="flex gap-1.5">
+                    {[0, 1, 2].map((i) => (
+                      <span 
+                        key={i} 
+                        className="w-2 h-2 rounded-full bg-primary/40 animate-bounce" 
+                        style={{ animationDelay: `${i * 0.15}s` }} 
                       />
-                    </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
-            </CardContent>
-          </Card>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
 
-          {/* Learning Progress */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Brain className="w-5 h-5 text-teal" />
-                <h3 className="font-semibold text-foreground">
-                  Learning Progress
-                </h3>
-              </div>
-              <div className="space-y-4">
-                {learningProgress.map((item, index) => (
-                  <motion.div
-                    key={item.category}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="flex items-center justify-between p-3 rounded-xl bg-slate-50"
-                  >
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {item.category}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        {item.patterns} patterns learned
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4 text-green-500" />
-                      <span className="text-sm font-medium text-green-600">
-                        {item.accuracy}%
-                      </span>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Suggested Prompts */}
+          <div className="px-4 py-3 border-t border-slate-100 bg-white">
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+              {suggestedPrompts.map((prompt, index) => (
+                <button 
+                  key={index} 
+                  onClick={() => setInputValue(prompt.text)} 
+                  className="flex items-center gap-2 flex-shrink-0 px-3 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-primary/30 rounded-full text-sm text-slate-700 transition-all hover:shadow-sm"
+                >
+                  <span>{prompt.icon}</span>
+                  <span>{prompt.text}</span>
+                </button>
+              ))}
+            </div>
+          </div>
 
-          {/* Quick Actions */}
-          <Card>
-            <CardContent className="p-6">
-              <h3 className="font-semibold text-foreground mb-4">
-                Avatar Can Help With
-              </h3>
-              <div className="space-y-2">
-                {[
-                  { icon: MessageCircle, label: "Compose emotion messages" },
-                  { icon: Palette, label: "Suggest patterns" },
-                  { icon: Lightbulb, label: "Expression ideas" },
-                  { icon: Star, label: "Track your progress" },
-                ].map((action, index) => (
-                  <button
-                    key={index}
-                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-coral/10 transition-colors">
-                        <action.icon className="w-4 h-4 text-slate-600 group-hover:text-coral transition-colors" />
-                      </div>
-                      <span className="text-sm text-slate-600 group-hover:text-foreground transition-colors">
-                        {action.label}
-                      </span>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-coral transition-colors" />
-                  </button>
-                ))}
+          {/* Input Area */}
+          <div className="p-4 border-t border-slate-200 bg-white">
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="icon" className="w-10 h-10 rounded-full flex-shrink-0">
+                <Mic className="w-4 h-4" />
+              </Button>
+              <div className="flex-1 relative">
+                <Input 
+                  value={inputValue} 
+                  onChange={(e) => setInputValue(e.target.value)} 
+                  onKeyPress={(e) => e.key === "Enter" && handleSend()} 
+                  placeholder="Tell me how you're feeling..." 
+                  className="pr-12 h-11 rounded-full bg-slate-50 border-slate-200 focus:bg-white"
+                />
               </div>
-            </CardContent>
-          </Card>
-        </div>
+              <Button 
+                variant="primary" 
+                size="icon" 
+                onClick={handleSend} 
+                disabled={!inputValue.trim()} 
+                className="w-10 h-10 rounded-full flex-shrink-0"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Right Sidebar - Hidden on smaller screens */}
+      <div className="w-80 flex-shrink-0 space-y-4 hidden xl:block">
+        {/* Avatar Stats Card */}
+        <Card className="overflow-hidden">
+          <div className="bg-gradient-to-br from-primary/10 to-primary/5 p-6 text-center">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-primary-dark mx-auto mb-4 flex items-center justify-center shadow-lg relative">
+              <Bot className="w-10 h-10 text-white" />
+              <div className="absolute -top-1 -right-1 w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center">
+                <Sparkles className="w-3 h-3 text-white" />
+              </div>
+            </div>
+            <h3 className="font-semibold text-slate-900 mb-1">Your Personal Avatar</h3>
+            <p className="text-xs text-slate-500 mb-4">Continuously learning your style</p>
+            <div className="flex items-center justify-center gap-6">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-primary">94%</p>
+                <p className="text-xs text-slate-500">Accuracy</p>
+              </div>
+              <div className="w-px h-10 bg-slate-200" />
+              <div className="text-center">
+                <p className="text-2xl font-bold text-primary">48</p>
+                <p className="text-xs text-slate-500">Patterns</p>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Personality Traits */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Heart className="w-4 h-4 text-primary" />
+              <h3 className="font-medium text-slate-900">Personality Traits</h3>
+            </div>
+            <div className="space-y-3">
+              {personalityTraits.map((item) => (
+                <div key={item.trait}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-sm text-slate-600">{item.trait}</span>
+                    <span className="text-xs font-semibold text-primary">{item.level}%</span>
+                  </div>
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-primary to-primary-light rounded-full transition-all duration-500" 
+                      style={{ width: `${item.level}%` }} 
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Learning Progress */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Brain className="w-4 h-4 text-primary" />
+              <h3 className="font-medium text-slate-900">Learning Progress</h3>
+            </div>
+            <div className="space-y-3">
+              {learningProgress.map((item) => (
+                <div key={item.category} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">{item.category}</p>
+                    <p className="text-xs text-slate-500">{item.patterns} patterns learned</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-emerald-600">
+                    <TrendingUp className="w-4 h-4" />
+                    <span className="text-sm font-semibold">{item.accuracy}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Tip */}
+        <Card className="bg-amber-50 border-amber-200">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-4 h-4 text-amber-600" />
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-amber-900 mb-1">Pro Tip</h4>
+                <p className="text-xs text-amber-700">
+                  The more you chat, the better I understand your emotional language. Try describing your feelings in detail!
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

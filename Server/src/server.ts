@@ -13,11 +13,14 @@ async function main() {
     // Initialize Socket.io
     initializeSocket(server);
 
-    server.listen(config.port, () => {
+    // Bind to 0.0.0.0 to accept connections from other computers on the network
+    server.listen(config.port, '0.0.0.0', () => {
       // eslint-disable-next-line no-console
       console.log(`🚀 Server is running on port ${config.port}`);
       // eslint-disable-next-line no-console
       console.log(`📡 Socket.io initialized`);
+      // eslint-disable-next-line no-console
+      console.log(`🌐 Accessible at http://YOUR_IP:${config.port}`);
     });
   } catch (err) {
     // eslint-disable-next-line no-console

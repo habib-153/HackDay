@@ -1,125 +1,81 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Camera, Brain, MessageSquare, Heart } from "lucide-react";
 
 const steps = [
   {
     number: "01",
-    icon: Camera,
     title: "Capture",
-    description:
-      "Express yourself through camera, drawings, or emotion selection. No need for words.",
-    color: "coral",
+    description: "Express through camera, drawings, or emotion selection.",
   },
   {
     number: "02",
-    icon: Brain,
     title: "Analyze",
-    description:
-      "Our AI understands your expressions, patterns, and emotional context in real-time.",
-    color: "teal",
+    description: "AI understands your expressions in real-time.",
   },
   {
     number: "03",
-    icon: MessageSquare,
     title: "Translate",
-    description:
-      "Your feelings are transformed into natural, heartfelt messages that truly represent you.",
-    color: "lavender",
+    description: "Feelings transformed into natural messages.",
   },
   {
     number: "04",
-    icon: Heart,
     title: "Connect",
-    description:
-      "Share authentic emotions with loved ones and build deeper, more meaningful relationships.",
-    color: "amber",
+    description: "Share authentic emotions with loved ones.",
   },
 ];
 
 export function HowItWorks() {
   return (
-    <section
-      id="how-it-works"
-      className="py-24 md:py-32 bg-slate-50 relative overflow-hidden"
-    >
-      {/* Background Pattern */}
-      <div className="absolute inset-0 pattern-dots opacity-50" />
-
-      <div className="relative max-w-7xl mx-auto px-6 lg:px-8">
-        {/* Section Header */}
+    <section id="how-it-works" className="py-24 bg-white">
+      <div className="max-w-6xl mx-auto px-6">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center max-w-3xl mx-auto mb-20"
+          className="text-center mb-16"
         >
-          <span className="inline-block text-sm font-semibold text-teal-dark uppercase tracking-wider mb-4">
+          <p className="text-sm font-medium text-primary uppercase tracking-wider mb-3">
             How It Works
-          </span>
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
-            From Expression to{" "}
-            <span className="text-gradient-warm">Connection</span>
+          </p>
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+            From Expression to Connection
           </h2>
-          <p className="text-lg text-slate-600 leading-relaxed">
-            A seamless journey from your heart to theirs, powered by empathetic AI
-            that truly understands.
+          <p className="text-slate-600 max-w-xl mx-auto">
+            A seamless journey powered by empathetic AI.
           </p>
         </motion.div>
 
         {/* Steps */}
-        <div className="relative">
-          {/* Connection Line */}
-          <div className="hidden lg:block absolute top-24 left-[12%] right-[12%] h-0.5 bg-gradient-to-r from-coral via-teal to-lavender opacity-20" />
+        <div className="grid md:grid-cols-4 gap-8">
+          {steps.map((step, index) => (
+            <motion.div
+              key={step.number}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="text-center"
+            >
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-md bg-primary text-white font-bold text-sm mb-4">
+                {step.number}
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                {step.title}
+              </h3>
+              <p className="text-slate-600 text-sm">
+                {step.description}
+              </p>
+            </motion.div>
+          ))}
+        </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6">
-            {steps.map((step, index) => (
-              <motion.div
-                key={step.number}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="text-center relative"
-              >
-                {/* Number Badge */}
-                <div className="relative inline-block mb-6">
-                  <div
-                    className={`w-20 h-20 rounded-3xl bg-white shadow-xl flex items-center justify-center relative z-10 group-hover:scale-105 transition-transform`}
-                    style={{
-                      boxShadow: `0 10px 40px -15px var(--${step.color})`,
-                    }}
-                  >
-                    <step.icon
-                      className="w-8 h-8"
-                      style={{ color: `var(--${step.color})` }}
-                    />
-                  </div>
-                  <span
-                    className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-br flex items-center justify-center text-xs font-bold text-white shadow-lg"
-                    style={{
-                      background: `linear-gradient(135deg, var(--${step.color}) 0%, var(--${step.color}-dark, var(--${step.color})) 100%)`,
-                    }}
-                  >
-                    {step.number}
-                  </span>
-                </div>
-
-                {/* Content */}
-                <h3 className="text-xl font-semibold text-foreground mb-3">
-                  {step.title}
-                </h3>
-                <p className="text-slate-600 leading-relaxed max-w-xs mx-auto">
-                  {step.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
+        {/* Connection line (desktop only) */}
+        <div className="hidden md:block relative mt-[-140px] mb-8 mx-auto max-w-3xl">
+          <div className="h-px bg-slate-200"></div>
         </div>
       </div>
     </section>
   );
 }
-

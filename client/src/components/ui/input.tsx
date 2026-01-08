@@ -16,14 +16,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={id}
-            className="block text-sm font-medium text-slate-700 mb-2"
+            className="block text-sm font-medium text-slate-700 mb-1"
           >
             {label}
           </label>
         )}
         <div className="relative">
           {icon && (
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
               {icon}
             </div>
           )}
@@ -32,12 +32,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             id={id}
             type={type}
             className={cn(
-              "w-full h-12 px-4 rounded-xl border border-slate-200 bg-white",
-              "text-foreground placeholder:text-slate-400",
-              "transition-all duration-200",
-              "focus:outline-none focus:ring-2 focus:ring-coral/20 focus:border-coral",
+              "w-full h-10 px-3 rounded-md border border-slate-200 bg-white",
+              "text-slate-900 placeholder:text-slate-400 text-sm",
+              "transition-colors duration-150",
+              "focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary",
               "hover:border-slate-300",
-              icon && "pl-12",
+              icon && "pl-9",
               error && "border-red-400 focus:ring-red-400/20 focus:border-red-400",
               className
             )}
@@ -45,7 +45,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           />
         </div>
         {error && (
-          <p className="mt-2 text-sm text-red-500">{error}</p>
+          <p className="mt-1 text-sm text-red-500">{error}</p>
         )}
       </div>
     );
@@ -55,4 +55,3 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 Input.displayName = "Input";
 
 export { Input };
-
