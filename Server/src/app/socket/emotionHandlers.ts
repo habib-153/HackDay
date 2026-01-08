@@ -10,6 +10,19 @@ interface EmotionFramePayload {
     targetUserId: string;
 }
 
+interface EmotionBroadcastPayload {
+    callId: string;
+    userId: string;
+    emotion: {
+        dominantEmotion: string;
+        emotions: string[];
+        confidence: number;
+        intensity: number;
+        generatedText?: string;
+        timestamp: number;
+    };
+}
+
 interface EmotionHistoryPayload {
     callId: string;
 }
@@ -20,8 +33,27 @@ interface AvatarSuggestionPayload {
 }
 
 export const emotionHandlers = (io: Server, socket: Socket, userId: string) => {
-    // Receive frame for emotion analysis
-    socket.on('emotion:frame', async ({ callId, frameData, targetUserId }: EmotionFramePayload) => {
+    // Simple emotion broadcast (for test page - client does AI analysis directly)
+    socket.on('emotion:frame', async (payload: EmotionFramePayload | EmotionBroadcastPayload) => {
+        // Check if this is a simple broadcast (has emotion object) vs frame analysis (has frameData)
+        if ('emotion' in payload && payload.emotion) {
+            const { callId, emotion } = payload as EmotionBroadcastPayload;
+            console.log(`[Emotion] Broadcasting ${emotion.dominantEmotion} from ${userId} to call ${callId}`);
+            
+            // Broadcast to the call room (excluding sender)
+            socket.to(`call:${callId}`).emit('emotion:result', {
+                userId,
+                emotion,
+            });
+            return;
+        }
+
+        // Original frame analysis logic
+        const { callId, frameData, targetUserId } = payload as EmotionFramePayload;
+        if (!frameData || !targetUserId) {
+            console.log('[Emotion] Invalid payload, skipping');
+            return;
+        }
         try {
             console.log(`[Emotion] Analyzing frame from ${userId} for call ${callId}`);
 

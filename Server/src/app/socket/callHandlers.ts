@@ -122,6 +122,17 @@ export const callHandlers = (io: Server, socket: Socket, userId: string) => {
         });
     });
 
+    // WebRTC signaling (simple-peer format) - forward signal to target user
+    socket.on('webrtc:signal', ({ signal, to, callId }: { signal: unknown; to: string; callId: string }) => {
+        console.log(`[WebRTC] Signal from ${userId} to ${to} for call ${callId}`);
+
+        io.to(`user:${to}`).emit('webrtc:signal', {
+            signal,
+            from: userId,
+            callId,
+        });
+    });
+
     // End a call
     socket.on('call:end', async ({ callId }: CallPayload) => {
         try {
