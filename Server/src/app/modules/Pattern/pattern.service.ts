@@ -1,13 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-unused-vars */
 import httpStatus from 'http-status';
 import AppError from '../../errors/AppError';
 import { TUserPattern } from './pattern.interface';
 import { UserPattern } from './pattern.model';
-// import { uploadToCloudinary } from '../../utils/cloudinary'; // TODO: Implement
+import { uploadToCloudinary } from '../../utils/uploadImage';
+import { deleteImageFromCloudinary } from '../../utils/deleteImage';
 
 const createPattern = async (userId: string, payload: Partial<TUserPattern> & { imageData: string }) => {
-    // TODO: Upload imageData to Cloudinary and get URL
-    // const imageUrl = await uploadToCloudinary(payload.imageData);
-    const imageUrl = payload.imageData; // Temporary: store base64 directly
+    const imageUrl = await uploadToCloudinary(payload.imageData);
 
     const pattern = await UserPattern.create({
         ...payload,
@@ -47,7 +48,18 @@ const deletePattern = async (userId: string, patternId: string) => {
         throw new AppError(httpStatus.NOT_FOUND, 'Pattern not found!');
     }
 
-    // TODO: Delete image from Cloudinary
+    // Delete image from Cloudinary
+    if (pattern.imageUrl) {
+        // Extract public_id from Cloudinary URL
+        // URL format: https://res.cloudinary.com/{cloud_name}/image/upload/{version}/{public_id}.{format}
+        const urlParts = pattern.imageUrl.split('/');
+        const uploadIndex = urlParts.indexOf('upload');
+        if (uploadIndex !== -1 && uploadIndex + 2 < urlParts.length) {
+            const publicIdWithExtension = urlParts.slice(uploadIndex + 2).join('/');
+            const publicId = publicIdWithExtension.split('.')[0]; // Remove file extension
+            await deleteImageFromCloudinary(publicId);
+        }
+    }
 
     return pattern;
 };
