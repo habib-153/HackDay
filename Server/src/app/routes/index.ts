@@ -34,6 +34,7 @@ const moduleRoutes = [
     path: '/avatar',
     route: AvatarRoutes,
   },
+  {
     path: '/video',
     route: VideoRoutes,
   },
