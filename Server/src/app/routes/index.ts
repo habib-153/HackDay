@@ -5,6 +5,7 @@ import { CallRoutes } from '../modules/Call/call.route';
 import { PatternRoutes } from '../modules/Pattern/pattern.route';
 import { ChatRoutes } from '../modules/Chat/chat.route';
 import { AvatarRoutes } from '../modules/Avatar/avatar.route';
+import { VideoRoutes } from '../modules/Video/video.route';
 
 const router = Router();
 
@@ -33,6 +34,10 @@ const moduleRoutes = [
     path: '/avatar',
     route: AvatarRoutes,
   },
+    path: '/video',
+    route: VideoRoutes,
+  },
+  // Add more module routes here as you create them
 ];
 
 moduleRoutes.forEach(route => router.use(route.path, route.route));
