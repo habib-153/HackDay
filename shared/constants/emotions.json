@@ -1,0 +1,100 @@
+{
+  "emotions": [
+    {
+      "id": "joy",
+      "name": "Joy",
+      "emoji": "😊",
+      "category": "joy",
+      "colorPalette": ["#FCD34D", "#F59E0B", "#FBBF24"],
+      "description": "Happiness and delight"
+    },
+    {
+      "id": "sadness",
+      "name": "Sadness",
+      "emoji": "😢",
+      "category": "sadness",
+      "colorPalette": ["#3B82F6", "#1E40AF", "#60A5FA"],
+      "description": "Sorrow and melancholy"
+    },
+    {
+      "id": "anxiety",
+      "name": "Anxiety",
+      "emoji": "😰",
+      "category": "fear",
+      "colorPalette": ["#8B5CF6", "#6D28D9", "#A78BFA"],
+      "description": "Worry and unease"
+    },
+    {
+      "id": "love",
+      "name": "Love",
+      "emoji": "❤️",
+      "category": "love",
+      "colorPalette": ["#EC4899", "#DB2777", "#F472B6"],
+      "description": "Deep affection and care"
+    },
+    {
+      "id": "frustration",
+      "name": "Frustration",
+      "emoji": "😤",
+      "category": "anger",
+      "colorPalette": ["#EF4444", "#DC2626", "#F87171"],
+      "description": "Annoyance and irritation"
+    },
+    {
+      "id": "curious",
+      "name": "Curious",
+      "emoji": "🤔",
+      "category": "surprise",
+      "colorPalette": ["#10B981", "#059669", "#34D399"],
+      "description": "Wonder and interest"
+    },
+    {
+      "id": "peaceful",
+      "name": "Peaceful",
+      "emoji": "😌",
+      "category": "joy",
+      "colorPalette": ["#06B6D4", "#0891B2", "#22D3EE"],
+      "description": "Calm and serene"
+    },
+    {
+      "id": "lonely",
+      "name": "Lonely",
+      "emoji": "😔",
+      "category": "sadness",
+      "colorPalette": ["#6B7280", "#4B5563", "#9CA3AF"],
+      "description": "Isolation and longing"
+    },
+    {
+      "id": "grateful",
+      "name": "Grateful",
+      "emoji": "🥰",
+      "category": "love",
+      "colorPalette": ["#F59E0B", "#EC4899", "#FCD34D"],
+      "description": "Thankfulness and appreciation"
+    },
+    {
+      "id": "neutral",
+      "name": "Neutral",
+      "emoji": "😶",
+      "category": "complex",
+      "colorPalette": ["#9CA3AF", "#6B7280", "#D1D5DB"],
+      "description": "Calm and balanced"
+    },
+    {
+      "id": "hopeful",
+      "name": "Hopeful",
+      "emoji": "🌟",
+      "category": "joy",
+      "colorPalette": ["#FBBF24", "#10B981", "#FCD34D"],
+      "description": "Optimistic expectation"
+    },
+    {
+      "id": "nostalgic",
+      "name": "Nostalgic",
+      "emoji": "🥲",
+      "category": "complex",
+      "colorPalette": ["#F59E0B", "#6B7280", "#FCD34D"],
+      "description": "Bittersweet memories"
+    }
+  ]
+}
