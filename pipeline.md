@@ -22,8 +22,8 @@
 
 | Use Case | Best API | Reasoning |
 |----------|----------|-----------|
-| **Real-time video frame analysis** | 🟦 Gemini 1.5 Flash | Fast, cost-effective, excellent multimodal |
-| **Pattern/drawing recognition** | 🟦 Gemini 1.5 Pro | Superior visual understanding |
+| **Real-time video frame analysis** | 🟦 Gemini 3 Flash | Fast, cost-effective, excellent multimodal |
+| **Pattern/drawing recognition** | 🟦 Gemini 3 Flash | Superior visual understanding |
 | **Complex emotion text generation** | 🟩 GPT-4o | More nuanced, empathetic writing |
 | **Personal avatar conversations** | 🟩 GPT-4o | Better personality consistency |
 | **Quick emotion classification** | 🟦 Gemini Flash | Low latency, structured output |
@@ -141,8 +141,8 @@ Real-time video calling platform where facial expressions and gestures are analy
 
 | Step | API | Input | Output |
 |------|-----|-------|--------|
-| Frame Analysis | 🟦 **Gemini 1.5 Flash** | Base64 image | Emotion JSON |
-| Text Generation | 🟦 **Gemini 1.5 Flash** | Emotion JSON + Context | Natural text |
+| Frame Analysis | 🟦 **Gemini 3 Flash** | Base64 image | Emotion JSON |
+| Text Generation | 🟦 **Gemini 3 Flash** | Emotion JSON + Context | Natural text |
 
 **Why Gemini for this feature:**
 - Real-time requirement (low latency)
@@ -242,7 +242,7 @@ Users create visual patterns (drawings, colors, shapes) that represent their emo
 │   ┌─────────────────────────────────────────────────────────────────────┐  │
 │   │                    PATTERN ANALYSIS                                  │  │
 │   │                                                                       │  │
-│   │   🟦 GEMINI 1.5 PRO (Vision)                                        │  │
+│   │   🟦 GEMINI 3 FLASH (Vision)                                        │  │
 │   │   ┌─────────────────────────────────────────────────────────────┐   │  │
 │   │   │  Analyze pattern characteristics:                            │   │  │
 │   │   │  • Shape type (spiral, angular, flowing, chaotic)           │   │  │
@@ -300,7 +300,7 @@ Users create visual patterns (drawings, colors, shapes) that represent their emo
 
 | Step | API | Reasoning |
 |------|-----|-----------|
-| Pattern Feature Extraction | 🟦 **Gemini 1.5 Pro** | Superior visual understanding |
+| Pattern Feature Extraction | 🟦 **Gemini 3 Flash** | Superior visual understanding |
 | Generate Embeddings | 🟦 **Gemini** | Structured output |
 | Rich Interpretation Text | 🟩 **GPT-4o** | Creative, empathetic writing |
 
@@ -573,7 +573,7 @@ An AI companion that learns the user's unique emotional patterns, communication 
 │   ┌─────────────────────────────────────────────────────────────────────┐  │
 │   │                    PROFILE BUILDER                                   │  │
 │   │                                                                       │  │
-│   │   🟦 GEMINI 1.5 PRO (Analysis)                                       │  │
+│   │   🟦 GEMINI 3 FLASH (Analysis)                                       │  │
 │   │                                                                       │  │
 │   │   Analyze user's historical data to build:                           │  │
 │   │                                                                       │  │
@@ -723,7 +723,7 @@ An AI companion that learns the user's unique emotional patterns, communication 
 
 | Step | API | Reasoning |
 |------|-----|-----------|
-| Profile Analysis | 🟦 **Gemini 1.5 Pro** | Complex data analysis |
+| Profile Analysis | 🟦 **Gemini 3 Flash** | Complex data analysis |
 | Avatar Conversations | 🟩 **GPT-4o** | Personality consistency |
 | Quick Suggestions | 🟦 **Gemini Flash** | Low latency |
 | Relationship Insights | 🟦 **Gemini** → 🟩 **GPT-4o** | Analysis then generation |
