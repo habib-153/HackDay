@@ -44,6 +44,7 @@ function VideoCallInline({ userId, socketUrl, contactId, contactName, onCallEnd 
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [incomingCallFrom, setIncomingCallFrom] = useState<string | null>(null);
   const [callId, setCallId] = useState<string | null>(null);
+  const [mediaError, setMediaError] = useState<string | null>(null);
 
   // Connect to socket
   useEffect(() => {
@@ -112,12 +113,32 @@ function VideoCallInline({ userId, socketUrl, contactId, contactName, onCallEnd 
 
   // Get camera access
   useEffect(() => {
+    // Check if mediaDevices is available (requires HTTPS or localhost)
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      const isSecure = window.location.protocol === 'https:' || 
+                       window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1';
+      
+      if (!isSecure) {
+        setMediaError(
+          "Camera access requires HTTPS. You're accessing via HTTP on a non-localhost address. " +
+          "Options: 1) Use localhost on each computer, 2) Set up HTTPS, or 3) Use Chrome with flag: " +
+          "chrome://flags/#unsafely-treat-insecure-origin-as-secure"
+        );
+      } else {
+        setMediaError("Your browser doesn't support camera access.");
+      }
+      return;
+    }
+
     navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       .then(stream => {
         setLocalStream(stream);
+        setMediaError(null);
       })
       .catch(err => {
         console.error("Camera error:", err);
+        setMediaError(`Camera access denied: ${err.message}`);
       });
 
     return () => {
@@ -174,6 +195,13 @@ function VideoCallInline({ userId, socketUrl, contactId, contactName, onCallEnd 
           {status === "active" && "In call"}
         </span>
       </div>
+
+      {/* Media Error Banner */}
+      {mediaError && (
+        <div className="bg-amber-900/80 border-b border-amber-700 p-3">
+          <p className="text-amber-200 text-sm text-center">{mediaError}</p>
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-8">
@@ -311,6 +339,21 @@ export default function TestCallPage() {
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Video Call Test</h1>
           <p className="text-slate-500">Test calls between two computers</p>
         </div>
+
+        {/* HTTPS Warning */}
+        <Card className="bg-amber-50 border-amber-200">
+          <CardContent className="p-4">
+            <h3 className="font-semibold text-amber-900 mb-2">⚠️ Camera Requires Secure Context</h3>
+            <p className="text-sm text-amber-800 mb-2">
+              Camera access requires HTTPS or localhost. To test on another computer via HTTP:
+            </p>
+            <ol className="text-sm text-amber-700 space-y-1 list-decimal list-inside">
+              <li>Open <code className="bg-amber-200 px-1 rounded">chrome://flags/#unsafely-treat-insecure-origin-as-secure</code></li>
+              <li>Add your test URL: <code className="bg-amber-200 px-1 rounded">http://YOUR_SERVER_IP:3000</code></li>
+              <li>Click &quot;Enable&quot; and restart Chrome</li>
+            </ol>
+          </CardContent>
+        </Card>
 
         {/* Network Setup */}
         <Card className="bg-emerald-50 border-emerald-200">
