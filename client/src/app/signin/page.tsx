@@ -17,12 +17,19 @@ import {
   EyeOff,
   Sparkles,
 } from "lucide-react";
+import { api } from "@/lib/api";
 
 export default function SignInPage() {
   const searchParams = useSearchParams();
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Form state
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   useEffect(() => {
     const mode = searchParams.get("mode");
@@ -32,11 +39,26 @@ export default function SignInPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsLoading(false);
-    // Navigate to dashboard
-    window.location.href = "/dashboard";
+    setError(null);
+
+    try {
+      if (isSignUp) {
+        // Register new user
+        const response = await api.register({ name, email, password });
+        api.setAccessToken(response.data.accessToken);
+      } else {
+        // Login existing user
+        const response = await api.login({ email, password });
+        api.setAccessToken(response.data.accessToken);
+      }
+      
+      // Navigate to dashboard on success
+      window.location.href = "/dashboard";
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -150,6 +172,17 @@ export default function SignInPage() {
             onSubmit={handleSubmit}
             className="space-y-5"
           >
+            {/* Error Message */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm"
+              >
+                {error}
+              </motion.div>
+            )}
+
             <AnimatePresence mode="wait">
               {isSignUp && (
                 <motion.div
@@ -163,6 +196,8 @@ export default function SignInPage() {
                     id="name"
                     placeholder="Enter your name"
                     icon={<User className="w-5 h-5" />}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     required
                   />
                 </motion.div>
@@ -175,6 +210,8 @@ export default function SignInPage() {
               type="email"
               placeholder="you@example.com"
               icon={<Mail className="w-5 h-5" />}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
 
@@ -185,6 +222,8 @@ export default function SignInPage() {
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 icon={<Lock className="w-5 h-5" />}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
               />
               <button

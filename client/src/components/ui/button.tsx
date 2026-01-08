@@ -5,8 +5,8 @@ import { motion, HTMLMotionProps } from "framer-motion";
 import { forwardRef } from "react";
 
 interface ButtonProps extends Omit<HTMLMotionProps<"button">, "ref"> {
-  variant?: "primary" | "secondary" | "outline" | "ghost" | "teal";
-  size?: "sm" | "md" | "lg" | "xl";
+  variant?: "primary" | "secondary" | "outline" | "ghost" | "teal" | "destructive";
+  size?: "sm" | "md" | "lg" | "xl" | "icon";
   isLoading?: boolean;
 }
 
@@ -36,6 +36,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ghost:
         "bg-transparent text-foreground hover:bg-slate-100 active:scale-[0.98]",
       teal: "bg-gradient-to-r from-teal-dark to-teal text-white hover:shadow-lg hover:shadow-teal/25 hover:scale-[1.02] active:scale-[0.98]",
+      destructive:
+        "bg-red-500 text-white hover:bg-red-600 hover:shadow-lg hover:shadow-red-500/25 active:scale-[0.98]",
     };
 
     const sizes = {
@@ -43,6 +45,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       md: "h-11 px-6 text-sm",
       lg: "h-12 px-8 text-base",
       xl: "h-14 px-10 text-lg",
+      icon: "h-10 w-10 p-0",
     };
 
     return (
