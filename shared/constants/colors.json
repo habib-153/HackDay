@@ -1,0 +1,61 @@
+{
+    "emotionColors": {
+        "joy": {
+            "primary": "#FCD34D",
+            "secondary": "#F59E0B",
+            "gradient": "linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%)"
+        },
+        "sadness": {
+            "primary": "#3B82F6",
+            "secondary": "#1E40AF",
+            "gradient": "linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%)"
+        },
+        "anxiety": {
+            "primary": "#8B5CF6",
+            "secondary": "#6D28D9",
+            "gradient": "linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)"
+        },
+        "love": {
+            "primary": "#EC4899",
+            "secondary": "#DB2777",
+            "gradient": "linear-gradient(135deg, #EC4899 0%, #DB2777 100%)"
+        },
+        "frustration": {
+            "primary": "#EF4444",
+            "secondary": "#DC2626",
+            "gradient": "linear-gradient(135deg, #EF4444 0%, #DC2626 100%)"
+        },
+        "curious": {
+            "primary": "#10B981",
+            "secondary": "#059669",
+            "gradient": "linear-gradient(135deg, #10B981 0%, #059669 100%)"
+        },
+        "peaceful": {
+            "primary": "#06B6D4",
+            "secondary": "#0891B2",
+            "gradient": "linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)"
+        },
+        "grateful": {
+            "primary": "#F59E0B",
+            "secondary": "#EC4899",
+            "gradient": "linear-gradient(135deg, #F59E0B 0%, #EC4899 100%)"
+        },
+        "hopeful": {
+            "primary": "#FBBF24",
+            "secondary": "#10B981",
+            "gradient": "linear-gradient(135deg, #FBBF24 0%, #10B981 100%)"
+        },
+        "nostalgic": {
+            "primary": "#F59E0B",
+            "secondary": "#6B7280",
+            "gradient": "linear-gradient(135deg, #F59E0B 0%, #6B7280 100%)"
+        }
+    },
+    "intensityScale": {
+        "subtle": 0.25,
+        "mild": 0.4,
+        "moderate": 0.6,
+        "strong": 0.8,
+        "overwhelming": 1.0
+    }
+}

@@ -18,5 +18,10 @@ export default {
   cloudinary_api_secret: process.env.CLOUDINARY_API_SECRET,
   sender_email: process.env.SENDER_EMAIL,
   sender_app_pass: process.env.SENDER_APP_PASS,
+  gemini_api_key: process.env.GEMINI_API_KEY,
+  openai_api_key: process.env.OPENAI_API_KEY,
+  python_ai_service_url: process.env.PYTHON_AI_SERVICE_URL,
+  redis_url: process.env.REDIS_URL,
   daily_api_key: process.env.DAILY_API_KEY,
 };
+
